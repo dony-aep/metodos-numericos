@@ -42,13 +42,9 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
 
     return {
       // Configuración del grid
-      grid: {
-        left: 70,
-        right: 40,
-        top: 50,
-        bottom: 90,
-        containLabel: false
-      },
+      grid: isMobile
+        ? { left: 45, right: 20, top: 35, bottom: 65, containLabel: false }
+        : { left: 70, right: 40, top: 50, bottom: 90, containLabel: false },
       
       // Toolbox con herramientas
       toolbox: {
@@ -251,14 +247,14 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
         }
       ]
     };
-  }, [iterations, isDarkTheme]);
+  }, [iterations, isDarkTheme, isMobile]);
 
   if (iterations.length === 0) {
     return (
       <Card className="border-border">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+            <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             Convergencia
           </CardTitle>
         </CardHeader>
@@ -273,16 +269,16 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
 
   return (
     <Card className="border-border overflow-hidden">
-      <CardHeader className="pb-2 bg-gradient-to-r from-background to-green-50/20 p-4 sm:p-6 sm:pb-2 dark:to-green-950/20">
+      <CardHeader className="pb-2 p-4 sm:p-6 sm:pb-2">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+          <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
           Convergencia
         </CardTitle>
         <CardDescription className="text-muted-foreground text-xs sm:text-sm">
           Error en escala logarítmica por iteración
         </CardDescription>
       </CardHeader>
-      <CardContent className={isDarkTheme ? 'p-1 sm:p-2 bg-muted/20' : 'p-1 sm:p-2 bg-slate-50/50'}>
+      <CardContent className="p-1 sm:p-2 bg-muted/10">
         <ReactECharts
           ref={chartRef}
           option={chartOption}

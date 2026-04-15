@@ -3,15 +3,18 @@
 ## Propósito del repositorio
 Construir una plataforma web educativa de métodos numéricos en español, con dashboard principal y módulos por tema que incluyan teoría, fórmulas, calculadora y visualización de resultados.
 
-## Stack oficial (actual)
-- React 19
-- Vite 8
-- TypeScript 6
-- Tailwind CSS 4
-- shadcn/ui
-- ECharts + echarts-for-react
-- mathjs + KaTeX
-- react-router-dom
+## Stack oficial (versiones exactas)
+- React `19.2.4` + React DOM `19.2.4`
+- Vite `8.0.4`
+- TypeScript `~6.0.2`
+- Tailwind CSS `^4.2.2` (con `@tailwindcss/vite`)
+- shadcn CLI `^4.2.0` + `@base-ui/react ^1.3.0`
+- ECharts `^6.0.0` + `echarts-for-react ^3.0.6`
+- mathjs `^15.2.0` + KaTeX `^0.16.45`
+- react-router-dom `^7.14.0`
+- lucide-react `^1.7.0`
+- next-themes `^0.4.6`
+- Fuente: Google Sans (vía CDN de Google Fonts)
 
 ## Estructura objetivo
 - `src/pages/` -> dashboard y páginas por método
@@ -70,3 +73,42 @@ Construir una plataforma web educativa de métodos numéricos en español, con d
 ## Notas operativas
 - Rama por defecto: `main`.
 - El proyecto se trabaja directamente en esta carpeta (sin subcarpetas anidadas de framework).
+
+## Comandos del proyecto
+```bash
+npm run dev       # servidor local (Vite)
+npm run build     # build de producción (tsc -b && vite build)
+npm run lint      # verificación ESLint
+npm run preview   # previsualizar build
+```
+Verificar siempre `npm run lint` y `npm run build` antes de dar una tarea por terminada.
+
+## Convención de commits
+- **Idioma:** español (el proyecto es completamente en español).
+- Detectar el idioma del mensaje antes de hacer commit: si el mensaje está en otro idioma, reescribirlo en español.
+- Formato: `tipo: descripción breve en español`
+- Tipos válidos: `feat`, `fix`, `refactor`, `style`, `docs`, `chore`
+- Ejemplos:
+  - `feat: agregar página del método de Jacobi`
+  - `fix: corregir cálculo en eliminación de Gauss`
+  - `refactor: extraer componente de tabla de iteraciones`
+  - `docs: actualizar PLAN.md con estado de interpolación`
+
+## Estado actual de implementación (Fase 5 completada)
+### Completado ✓
+- Dashboard principal (`/`)
+- Método de la Secante (`/metodos/secante`)
+- Sistemas de ecuaciones lineales (`/metodos/sistemas-lineales`)
+- Eliminación de Gauss (`/metodos/eliminacion-gauss`)
+- Jacobi y Gauss-Seidel (`/metodos/jacobi-gauss-seidel`)
+- Interpolación polinómica (`/metodos/interpolacion-polinomica`)
+- Diferencias divididas de Newton (`/metodos/newton-diferencias-divididas`)
+- Interpolación de Lagrange (`/metodos/lagrange`)
+- Ajuste por mínimos cuadrados (`/metodos/minimos-cuadrados`)
+- Derivación numérica (`/metodos/derivacion-numerica`)
+- Integración numérica — Trapecio y Simpson (`/metodos/integracion-numerica`)
+- Ecuaciones diferenciales — Euler (`/metodos/euler`)
+- Modo oscuro global (claro/oscuro/sistema)
+- UX/UI responsive (gráficos adaptativos, grids responsive)
+- Copy y contenido didáctico pulido
+- Build y lint limpios para despliegue

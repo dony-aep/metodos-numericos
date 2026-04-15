@@ -2,6 +2,60 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
+## [0.2.0] - 2026-04-15
+
+### Added
+- Módulo completo de **Jacobi y Gauss-Seidel** (`/metodos/jacobi-gauss-seidel`):
+  - Teoría comparativa de ambos métodos con tabla de convergencia,
+  - Selector de método (Jacobi / Gauss-Seidel),
+  - Resolución iterativa con tabla de aproximaciones y vector residual.
+- Módulo completo de **Interpolación polinómica** (`/metodos/interpolacion-polinomica`):
+  - Teoría de formas de Lagrange y Newton, fenómeno de Runge,
+  - Grid de puntos reutilizable (`InterpolationInputGrid`),
+  - Tabla de diferencias divididas y gráfica del polinomio interpolante.
+- Módulo completo de **Diferencias divididas de Newton** (`/metodos/newton-diferencias-divididas`):
+  - Teoría de construcción incremental y evaluación con Horner,
+  - Tabla triangular de diferencias divididas,
+  - Gráfica del polinomio de Newton.
+- Módulo completo de **Interpolación de Lagrange** (`/metodos/lagrange`):
+  - Teoría de bases de Lagrange y forma baricéntrica,
+  - Tabla de pesos baricéntricos y evaluación de bases,
+  - Comparación Lagrange vs. Newton.
+- Módulo completo de **Ajuste por mínimos cuadrados** (`/metodos/minimos-cuadrados`):
+  - Teoría de ajuste lineal, forma matricial y R²,
+  - Selector de grado (1–5) con ejemplos predefinidos,
+  - Gráfica de ajuste con datos y curva, tabla de residuos.
+- Módulo completo de **Derivación numérica** (`/metodos/derivacion-numerica`):
+  - Teoría de 5 esquemas (adelante, atrás, centrada, cinco puntos, segunda derivada),
+  - Extrapolación de Richardson y análisis de error,
+  - Gráfica de convergencia al refinar h.
+- Módulo completo de **Integración numérica** (`/metodos/integracion-numerica`):
+  - Teoría de Trapecio y Simpson 1/3 (simple y compuesta),
+  - Comparación lado a lado de ambos métodos,
+  - Gráfica de integración y convergencia al aumentar n.
+- Módulo completo de **Método de Euler para EDOs** (`/metodos/euler`):
+  - Teoría de derivación, algoritmo, error y estabilidad,
+  - Soporte para funciones f(x, y) con parser de dos variables,
+  - Curva solución con comparación exacta opcional.
+- Documentación de investigación para todos los temas en `docs/`.
+
+### Changed
+- **UX/UI responsive**: gráficos adaptativos con `useIsMobile` en los 9 componentes de charts (ECharts), padding y altura responsive, grids de formularios corregidos.
+- **Fuente principal**: migración de Geist Variable a Google Sans vía CDN (Google Fonts).
+- **Rendimiento**: code-splitting automático por página (Vite lazy loading), `chunkSizeWarningLimit` ajustado.
+- **Copy y contenido didáctico**:
+  - Empty states estandarizados al patrón "Listo para [verbo]" en las 11 páginas,
+  - Botón secundario unificado a "Limpiar" con icono `Eraser`,
+  - Descripciones de métodos en dashboard refinadas,
+  - Columna de residual homogeneizada entre módulos,
+  - Tarjetas de error/no disponible en `MethodPage` con soporte dark mode.
+- **Dark mode**: correcciones en tarjetas de estado de `MethodPage` (rose/amber) para tema oscuro.
+
+### Fixed
+- Lint: `prefer-const` en `solveGaussSeidel` (`iterativeMethods.ts`).
+- Lint: dependencia `isMobile` agregada a todos los `useMemo` de gráficos.
+- Texto obsoleto de "migración de secante" eliminado de `MethodPage`.
+
 ## [0.1.0] - 2026-04-08
 
 ### Added

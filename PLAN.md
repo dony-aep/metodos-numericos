@@ -98,35 +98,35 @@ Rutas base propuestas:
 ### Fase 4 - Implementar métodos restantes
 - [x] Sistemas de ecuaciones lineales
 - [x] Eliminación de Gauss
-- [ ] Jacobi y Gauss-Seidel
-- [ ] Interpolación polinómica
-- [ ] Diferencias divididas de Newton
-- [ ] Interpolación de Lagrange
-- [ ] Ajuste por mínimos cuadrados
-- [ ] Derivación numérica
-- [ ] Integración numérica (Trapecio y Simpson)
-- [ ] EDOs (Euler)
+- [x] Jacobi y Gauss-Seidel
+- [x] Interpolación polinómica
+- [x] Diferencias divididas de Newton
+- [x] Interpolación de Lagrange
+- [x] Ajuste por mínimos cuadrados
+- [x] Derivación numérica
+- [x] Integración numérica (Trapecio y Simpson)
+- [x] EDOs (Euler)
 
 ### Fase 5 - Cierre técnico
 - [x] Implementar modo oscuro global (selector claro/oscuro/sistema + theming base)
-- [ ] Homogeneizar UX/UI responsive
-- [ ] Ajustar copy y contenido didáctico
-- [ ] Optimizar gráficos y rendimiento
-- [ ] Build final limpio para despliegue
+- [x] Homogeneizar UX/UI responsive (gráficos adaptativos con useIsMobile, grids y padding responsive)
+- [x] Ajustar copy y contenido didáctico (empty states, descripciones, labels, botones estandarizados)
+- [x] Optimizar gráficos y rendimiento (code-splitting automático por página, fuente Google Sans vía CDN)
+- [x] Build final limpio para despliegue (0 errores build, 0 errores/warnings lint)
 
 ## Seguimiento por tema
 - [x] Dashboard principal
 - [x] Método de la Secante
 - [x] Sistemas de ecuaciones lineales
 - [x] Eliminación de Gauss
-- [ ] Jacobi y Gauss-Seidel
-- [ ] Interpolación polinómica
-- [ ] Diferencias divididas de Newton
-- [ ] Interpolación de Lagrange
-- [ ] Ajuste por mínimos cuadrados
-- [ ] Derivación numérica
-- [ ] Integración numérica (Trapecio y Simpson)
-- [ ] EDOs (Euler)
+- [x] Jacobi y Gauss-Seidel
+- [x] Interpolación polinómica
+- [x] Diferencias divididas de Newton
+- [x] Interpolación de Lagrange
+- [x] Ajuste por mínimos cuadrados
+- [x] Derivación numérica
+- [x] Integración numérica (Trapecio y Simpson)
+- [x] EDOs (Euler)
 
 ## Criterio de "hecho" por tema
 Un tema se marca implementado cuando cumple:

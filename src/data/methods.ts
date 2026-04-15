@@ -12,7 +12,7 @@ export const NUMERICAL_METHODS: NumericalMethod[] = [
     slug: 'sistemas-lineales',
     title: 'Sistemas de ecuaciones lineales',
     shortDescription:
-      'Fundamentos para representar y resolver sistemas lineales en forma matricial.',
+      'Resolución de sistemas lineales en forma matricial Ax = b mediante métodos directos.',
     status: 'available',
   },
   {
@@ -26,57 +26,57 @@ export const NUMERICAL_METHODS: NumericalMethod[] = [
     slug: 'jacobi-gauss-seidel',
     title: 'Métodos iterativos (Jacobi y Gauss-Seidel)',
     shortDescription:
-      'Métodos aproximados para sistemas lineales y análisis de convergencia.',
-    status: 'coming-soon',
+      'Resolución iterativa de sistemas lineales grandes mediante aproximaciones sucesivas.',
+    status: 'available',
   },
   {
     slug: 'interpolacion-polinomica',
     title: 'Interpolación polinómica',
     shortDescription:
-      'Construcción de polinomios que aproximan un conjunto de datos discretos.',
-    status: 'coming-soon',
+      'Construcción del polinomio único que pasa exactamente por un conjunto de puntos dados.',
+    status: 'available',
   },
   {
     slug: 'newton-diferencias-divididas',
     title: 'Diferencias divididas de Newton',
     shortDescription:
       'Forma incremental de interpolación con tabla de diferencias divididas.',
-    status: 'coming-soon',
+    status: 'available',
   },
   {
     slug: 'lagrange',
     title: 'Interpolación de Lagrange',
     shortDescription:
       'Interpolación directa usando polinomios base de Lagrange.',
-    status: 'coming-soon',
+    status: 'available',
   },
   {
     slug: 'minimos-cuadrados',
     title: 'Ajuste por mínimos cuadrados',
     shortDescription:
       'Ajuste de curvas y rectas minimizando el error cuadrático total.',
-    status: 'coming-soon',
+    status: 'available',
   },
   {
     slug: 'derivacion-numerica',
     title: 'Derivación numérica',
     shortDescription:
       'Aproximación de derivadas con esquemas hacia adelante, atrás y centrados.',
-    status: 'coming-soon',
+    status: 'available',
   },
   {
     slug: 'integracion-numerica',
     title: 'Integración numérica (Trapecio y Simpson)',
     shortDescription:
       'Aproximación de integrales definidas con reglas compuestas.',
-    status: 'coming-soon',
+    status: 'available',
   },
   {
     slug: 'euler',
     title: 'Ecuaciones diferenciales ordinarias (Euler)',
     shortDescription:
       'Método de Euler para aproximar la solución de problemas de valor inicial.',
-    status: 'coming-soon',
+    status: 'available',
   },
 ];
 

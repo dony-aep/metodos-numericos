@@ -55,14 +55,13 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
         axisLine: isDarkTheme ? '#64748b' : '#94a3b8',
         axisTick: isDarkTheme ? '#475569' : '#cbd5e1',
         splitLine: isDarkTheme ? '#334155' : '#e2e8f0',
-        secant: isDarkTheme ? '#f87171' : '#ef4444',
-        functionLine: isDarkTheme ? '#f59e0b' : '#d97706',
-        iteration: isDarkTheme ? '#f97316' : '#dc2626',
+        secant: isDarkTheme ? '#a1a1aa' : '#71717a',
+        functionLine: isDarkTheme ? '#e4e4e7' : '#3f3f46',
+        iteration: isDarkTheme ? '#d4d4d8' : '#52525b',
         root: isDarkTheme ? '#22c55e' : '#16a34a',
-        sliderBorder: isDarkTheme ? '#f59e0b' : '#d97706',
-        sliderFill: isDarkTheme ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.15)',
-        sliderArea: isDarkTheme ? 'rgba(245, 158, 11, 0.15)' : '#fef3c7',
-        chartSurface: isDarkTheme ? 'bg-muted/20' : 'bg-slate-50/50',
+        sliderBorder: isDarkTheme ? '#a1a1aa' : '#71717a',
+        sliderFill: isDarkTheme ? 'rgba(161, 161, 170, 0.2)' : 'rgba(113, 113, 122, 0.15)',
+        sliderArea: isDarkTheme ? 'rgba(161, 161, 170, 0.15)' : 'rgba(228, 228, 231, 0.5)',
       };
 
       const secantSeries = secantLines.map((line, idx) => {
@@ -78,7 +77,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
           name: `Secante ${idx + 1}`,
           data: [[extendedX1, extendedY1], [extendedX2, extendedY2]] as [number, number][],
           lineStyle: {
-            color: `rgba(${isDarkTheme ? '248, 113, 113' : '239, 68, 68'}, ${opacity})`,
+            color: `rgba(${isDarkTheme ? '161, 161, 170' : '113, 113, 122'}, ${opacity})`,
             width: 2
           },
           symbol: 'none',
@@ -88,13 +87,9 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
 
       return {
         // Configuración del grid
-        grid: {
-          left: 60,
-          right: 40,
-          top: 60,
-          bottom: 100,
-          containLabel: false
-        },
+        grid: isMobile
+          ? { left: 40, right: 20, top: 40, bottom: 70, containLabel: false }
+          : { left: 60, right: 40, top: 60, bottom: 100, containLabel: false },
         
         // Toolbox con herramientas de zoom, reset y guardar imagen
         toolbox: {
@@ -333,14 +328,14 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
     } catch {
       return {};
     }
-  }, [functionExpr, x0, x1, root, iterations, isDarkTheme]);
+  }, [functionExpr, x0, x1, root, iterations, isDarkTheme, isMobile]);
 
   if (!functionExpr) {
     return (
       <Card className="border-border">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+            <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             Gráfica de f(x)
           </CardTitle>
         </CardHeader>
@@ -358,12 +353,12 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
       <Card className="border-border">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+            <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             Gráfica de f(x)
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="h-48 sm:h-80 flex items-center justify-center text-red-500 text-sm sm:text-base">
+          <div className="h-48 sm:h-80 flex items-center justify-center text-destructive text-sm sm:text-base">
             Error al generar la gráfica
           </div>
         </CardContent>
@@ -373,13 +368,13 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
 
   return (
     <Card className="border-border overflow-hidden">
-      <CardHeader className="pb-2 bg-gradient-to-r from-background to-amber-50/20 p-4 sm:p-6 sm:pb-2 dark:to-amber-950/20">
+      <CardHeader className="pb-2 p-4 sm:p-6 sm:pb-2">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
+          <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
           Gráfica de f(x)
         </CardTitle>
       </CardHeader>
-      <CardContent className={isDarkTheme ? 'p-1 sm:p-2 bg-muted/20' : 'p-1 sm:p-2 bg-slate-50/50'}>
+      <CardContent className="p-1 sm:p-2 bg-muted/10">
         <ReactECharts
           ref={chartRef}
           option={chartOption}

@@ -3,10 +3,10 @@ import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
+import { GaussEliminationHeader } from '@/components/topics/eliminacion-gauss/Header';
 import { GaussEliminationResults } from '@/components/topics/eliminacion-gauss/GaussEliminationResults';
 import { GaussEliminationTheory } from '@/components/topics/eliminacion-gauss/GaussEliminationTheory';
 import { LinearSystemInputGrid } from '@/components/topics/sistemas-lineales/LinearSystemInputGrid';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useGaussElimination } from '@/hooks/useGaussElimination';
 
@@ -141,29 +141,25 @@ export default function GaussEliminationPage() {
   const emptyState =
     !result && status === 'idle' ? (
       <MethodEmptyState
-        title="Sistema listo para triangular"
+        title="Listo para resolver"
         description="Ingresa A y b para aplicar eliminación de Gauss con pivoteo parcial."
       />
     ) : null;
 
   return (
-    <MethodModuleLayout
-      labels={{
-        calculatorTab: 'Calculadora',
-        theoryTab: 'Teoría',
-        inputSectionTitle: 'Eliminación de Gauss (Ax = b)',
-      }}
-      calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-      theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-      inputSection={
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Método directo</Badge>
-            <Badge variant="outline">Pivoteo parcial</Badge>
-            <Badge variant="outline">Sustitución hacia atrás</Badge>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
+    <div className="space-y-4">
+      <GaussEliminationHeader />
+      <MethodModuleLayout
+        labels={{
+          calculatorTab: 'Calculadora',
+          theoryTab: 'Teoría',
+          inputSectionTitle: 'Eliminación de Gauss (Ax = b)',
+        }}
+        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
+        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+        inputSection={
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-foreground">Tamaño del sistema:</span>
             {[2, 3, 4].map((candidate) => (
               <Button
@@ -215,9 +211,10 @@ export default function GaussEliminationPage() {
           ) : null}
         </div>
       }
-      resultsSection={resultsSection}
-      emptyState={emptyState}
-      theorySection={<GaussEliminationTheory />}
-    />
+        resultsSection={resultsSection}
+        emptyState={emptyState}
+        theorySection={<GaussEliminationTheory />}
+      />
+    </div>
   );
 }

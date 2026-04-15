@@ -1,8 +1,9 @@
+import { AlertTriangle, CheckCircle2, Info, List } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -37,53 +38,73 @@ function typeLabel(type: GaussStepType): string {
   return 'Sustitución';
 }
 
+function typeBadgeVariant(type: GaussStepType) {
+  if (type === 'intercambio') return 'secondary' as const;
+  if (type === 'sustitucion') return 'outline' as const;
+  return 'outline' as const;
+}
+
 function AugmentedMatrixTable({
   matrix,
   title,
-  description,
 }: {
   matrix: number[][];
   title: string;
-  description?: string;
 }) {
   if (matrix.length === 0) return null;
   const variableCount = matrix[0].length - 1;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
+    <Card className="border-border bg-card">
+      <CardHeader className="pb-0">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Info className="h-4 w-4 text-muted-foreground" />
+          {title}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Fila</TableHead>
-              {Array.from({ length: variableCount }).map((_, index) => (
-                <TableHead key={`head-a-${index}`} className="text-right">
-                  x{index + 1}
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/20 hover:bg-muted/20">
+                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  Fila
                 </TableHead>
-              ))}
-              <TableHead className="text-right">b</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {matrix.map((row, rowIndex) => (
-              <TableRow key={`matrix-row-${rowIndex}`}>
-                <TableCell>F{rowIndex + 1}</TableCell>
-                {row.map((value, colIndex) => (
-                  <TableCell
-                    key={`matrix-cell-${rowIndex}-${colIndex}`}
-                    className="text-right font-mono"
+                {Array.from({ length: variableCount }).map((_, index) => (
+                  <TableHead
+                    key={`head-a-${index}`}
+                    className="text-right text-[10px] font-semibold uppercase tracking-wider"
                   >
-                    {formatNumber(value)}
-                  </TableCell>
+                    x{index + 1}
+                  </TableHead>
                 ))}
+                <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  b
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {matrix.map((row, rowIndex) => (
+                <TableRow key={`matrix-row-${rowIndex}`}>
+                  <TableCell className="font-medium text-muted-foreground">
+                    F{rowIndex + 1}
+                  </TableCell>
+                  {row.map((value, colIndex) => (
+                    <TableCell
+                      key={`matrix-cell-${rowIndex}-${colIndex}`}
+                      className={cn(
+                        'text-right font-mono tabular-nums',
+                        colIndex === variableCount && 'border-l border-border'
+                      )}
+                    >
+                      {formatNumber(value)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
@@ -91,44 +112,65 @@ function AugmentedMatrixTable({
 
 function StepsTable({ steps }: { steps: GaussEliminationStep[] }) {
   return (
-    <Card>
+    <Card className="border-border bg-card">
       <CardHeader>
-        <CardTitle>Trazabilidad de pasos</CardTitle>
-        <CardDescription>
-          Registro del pivoteo, eliminación y sustitución realizado por el algoritmo.
-        </CardDescription>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <List className="h-4 w-4 text-muted-foreground" />
+          Trazabilidad de pasos
+          <Badge variant="secondary" className="ml-auto font-mono text-xs">
+            {steps.length}
+          </Badge>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Columna pivote</TableHead>
-              <TableHead className="text-right">Factor</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {steps.map((step) => (
-              <TableRow key={`step-${step.step}`}>
-                <TableCell>{step.step}</TableCell>
-                <TableCell>{typeLabel(step.type)}</TableCell>
-                <TableCell>{step.pivotColumn}</TableCell>
-                <TableCell className="text-right font-mono">
-                  {step.factor === null ? '-' : formatNumber(step.factor)}
-                </TableCell>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/20 hover:bg-muted/20">
+                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  #
+                </TableHead>
+                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  Tipo
+                </TableHead>
+                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  Col. pivote
+                </TableHead>
+                <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  Factor
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {steps.map((step) => (
+                <TableRow key={`step-${step.step}`}>
+                  <TableCell className="font-mono tabular-nums text-muted-foreground">
+                    {step.step}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={typeBadgeVariant(step.type)} className="text-xs">
+                      {typeLabel(step.type)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-mono tabular-nums">{step.pivotColumn}</TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">
+                    {step.factor === null ? '—' : formatNumber(step.factor)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="space-y-px border-t border-border">
           {steps.map((step) => (
             <div
               key={`step-detail-${step.step}`}
-              className="rounded-lg border bg-muted/20 p-3 text-sm"
+              className="flex gap-3 border-b border-border px-4 py-3 text-sm last:border-b-0"
             >
-              <p className="font-medium text-foreground">Paso {step.step}</p>
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                {String(step.step).padStart(2, '0')}
+              </span>
               <p className="text-muted-foreground">{step.description}</p>
             </div>
           ))}
@@ -139,88 +181,130 @@ function StepsTable({ steps }: { steps: GaussEliminationStep[] }) {
 }
 
 export function GaussEliminationResults({ result }: GaussEliminationResultsProps) {
+  const unique = result.hasUniqueSolution;
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Resumen del resultado</CardTitle>
+      {/* Diagnóstico */}
+      <Card className="border-border bg-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            {unique ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            )}
+            Diagnóstico
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          <Badge variant="outline">Método directo</Badge>
-          <Badge variant="outline">Pivoteo parcial</Badge>
-          <Badge variant={result.hasUniqueSolution ? 'default' : 'destructive'}>
-            {result.hasUniqueSolution ? 'Solución única' : 'Sin solución única'}
+          <Badge
+            className={cn(
+              'text-xs',
+              unique
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300'
+                : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300'
+            )}
+            variant="outline"
+          >
+            {unique ? 'Solución única' : 'Sin solución única'}
           </Badge>
           {result.determinant !== null ? (
-            <Badge variant="outline">det(A) = {formatNumber(result.determinant)}</Badge>
+            <Badge variant="outline" className="font-mono text-xs tabular-nums">
+              det(A) = {formatNumber(result.determinant)}
+            </Badge>
           ) : null}
         </CardContent>
       </Card>
 
+      {/* Vector solución */}
       {result.solution ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Vector solución</CardTitle>
+        <Card className="border-border bg-card">
+          <CardHeader className="pb-0">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+              Vector solución
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Variable</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {result.solution.map((value, index) => (
-                  <TableRow key={`solution-${index}`}>
-                    <TableCell>x{index + 1}</TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatNumber(value)}
-                    </TableCell>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/20 hover:bg-muted/20">
+                    <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                      Variable
+                    </TableHead>
+                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                      Valor
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {result.solution.map((value, index) => (
+                    <TableRow key={`solution-${index}`}>
+                      <TableCell className="font-medium">
+                        x<sub>{index + 1}</sub>
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {formatNumber(value)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       ) : null}
 
+      {/* Residual */}
       {result.residual ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Vector residual (Ax - b)</CardTitle>
+        <Card className="border-border bg-card">
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base text-muted-foreground">
+              Vector residual (Ax − b)
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Componente</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {result.residual.map((value, index) => (
-                  <TableRow key={`residual-${index}`}>
-                    <TableCell>r{index + 1}</TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatNumber(value)}
-                    </TableCell>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/20 hover:bg-muted/20">
+                    <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                      Componente
+                    </TableHead>
+                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                      Valor
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {result.residual.map((value, index) => (
+                    <TableRow key={`residual-${index}`}>
+                      <TableCell className="font-medium text-muted-foreground">
+                        r<sub>{index + 1}</sub>
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {formatNumber(value)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       ) : null}
 
+      {/* Triangular superior */}
       {result.upperTriangular ? (
         <AugmentedMatrixTable
           matrix={result.upperTriangular}
-          title="Matriz aumentada triangular superior"
-          description="Estado final tras la eliminación hacia adelante."
+          title="Matriz triangular superior"
         />
       ) : null}
 
+      {/* Pasos */}
       <StepsTable steps={result.steps} />
     </div>
   );

@@ -61,7 +61,7 @@ export function MethodModuleLayout({
             <CardHeader className="p-4 sm:p-6">
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 {calculatorIcon ?? (
-                  <Calculator className="h-4 w-4 text-amber-500 sm:h-5 sm:w-5" />
+                  <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />
                 )}
                 {mergedLabels.inputSectionTitle}
               </CardTitle>

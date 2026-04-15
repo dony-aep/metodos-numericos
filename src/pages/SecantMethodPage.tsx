@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarChart3, Loader2, Play, RotateCcw } from 'lucide-react';
+import { BarChart3, Eraser, Loader2, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
@@ -84,8 +84,8 @@ function SecantMethodPage() {
           onClick={handleReset}
           className="h-10 w-full gap-2 text-sm sm:h-11 sm:w-auto"
         >
-          <RotateCcw className="h-4 w-4" />
-          Reiniciar
+          <Eraser className="h-4 w-4" />
+          Limpiar
         </Button>
       </div>
     </>
@@ -98,7 +98,7 @@ function SecantMethodPage() {
         message={result.message}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 sm:gap-6">
         <FunctionPlot
           functionExpr={functionExpr}
           iterations={result.iterations}
@@ -139,11 +139,7 @@ function SecantMethodPage() {
         inputSection={inputSection}
         resultsSection={resultsSection}
         emptyState={emptyState}
-        theorySection={
-          <div className="dark:[&_.text-slate-800]:text-slate-100 dark:[&_.text-slate-700]:text-slate-200 dark:[&_.text-slate-600]:text-slate-300 dark:[&_.text-slate-500]:text-slate-400 dark:[&_.bg-slate-50]:bg-slate-900/40 dark:[&_.bg-white]:bg-slate-900/70 dark:[&_.border-slate-200]:border-slate-700">
-            <AlgorithmExplanation />
-          </div>
-        }
+        theorySection={<AlgorithmExplanation />}
       />
     </div>
   );

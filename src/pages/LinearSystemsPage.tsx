@@ -3,10 +3,10 @@ import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
+import { LinearSystemHeader } from '@/components/topics/sistemas-lineales/Header';
 import { LinearSystemInputGrid } from '@/components/topics/sistemas-lineales/LinearSystemInputGrid';
 import { LinearSystemResults } from '@/components/topics/sistemas-lineales/LinearSystemResults';
 import { LinearSystemsTheory } from '@/components/topics/sistemas-lineales/LinearSystemsTheory';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLinearSystem } from '@/hooks/useLinearSystem';
 
@@ -151,7 +151,7 @@ export default function LinearSystemsPage() {
         onConstantChange={handleConstantChange}
       />
 
-      {parseError ? <p className="text-sm text-rose-700">{parseError}</p> : null}
+      {parseError ? <p className="text-sm text-destructive">{parseError}</p> : null}
 
       <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:gap-3">
         <Button
@@ -192,36 +192,35 @@ export default function LinearSystemsPage() {
   const emptyState =
     !result && status === 'idle' ? (
       <MethodEmptyState
-        title="Modelo matricial listo"
+        title="Listo para resolver"
         description="Define los coeficientes de A y el vector b para resolver Ax=b."
       />
     ) : null;
 
   return (
-    <MethodModuleLayout
-      labels={{
-        calculatorTab: 'Calculadora',
-        theoryTab: 'Teoría',
-        inputSectionTitle: 'Sistema Ax = b',
-      }}
-      calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-      theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-      inputSection={
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Método directo</Badge>
-            <Badge variant="outline">Matriz de coeficientes</Badge>
-            <Badge variant="outline">Ax = b</Badge>
+    <div className="space-y-4">
+      <LinearSystemHeader />
+
+      <MethodModuleLayout
+        labels={{
+          calculatorTab: 'Calculadora',
+          theoryTab: 'Teoría',
+          inputSectionTitle: 'Sistema Ax = b',
+        }}
+        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
+        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+        inputSection={
+          <div className="space-y-4">
+            {inputSection}
+            {status === 'error' && error ? (
+              <p className="text-sm text-destructive">{error}</p>
+            ) : null}
           </div>
-          {inputSection}
-          {status === 'error' && error ? (
-            <p className="text-sm text-rose-700">{error}</p>
-          ) : null}
-        </div>
-      }
-      resultsSection={resultsSection}
-      emptyState={emptyState}
-      theorySection={<LinearSystemsTheory />}
-    />
+        }
+        resultsSection={resultsSection}
+        emptyState={emptyState}
+        theorySection={<LinearSystemsTheory />}
+      />
+    </div>
   );
 }

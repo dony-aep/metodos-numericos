@@ -10,10 +10,10 @@ interface MethodResultBannerProps {
 }
 
 const variantStyles: Record<ModuleBannerVariant, string> = {
-  success: 'border-green-200 bg-green-50 text-green-800',
-  warning: 'border-amber-200 bg-amber-50 text-amber-800',
-  error: 'border-rose-200 bg-rose-50 text-rose-800',
-  info: 'border-sky-200 bg-sky-50 text-sky-800',
+  success: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300',
+  warning: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300',
+  error: 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-300',
+  info: 'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-300',
 };
 
 const variantIcons: Record<ModuleBannerVariant, ReactNode> = {

@@ -17,7 +17,7 @@ export function AppLayout() {
       <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2 text-foreground">
-            <Sigma className="h-5 w-5 text-amber-600" />
+            <Sigma className="h-5 w-5" />
             <span className="text-sm font-semibold sm:text-base">
               Métodos Numéricos
             </span>
@@ -48,7 +48,7 @@ export function AppLayout() {
       <footer className="border-t border-border bg-background">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-4 text-xs text-muted-foreground sm:px-6 sm:text-sm">
           <p className="inline-flex items-center gap-2 font-medium text-foreground">
-            <BookOpenCheck className="h-4 w-4 text-amber-600" />
+            <BookOpenCheck className="h-4 w-4" />
             Plataforma de aprendizaje de análisis numérico
           </p>
           <Separator className="my-1" />

@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FunctionInputProps {
   value: string;
@@ -11,13 +12,15 @@ interface FunctionInputProps {
 }
 
 const EXAMPLES = [
-  { label: 'x³ + 2x² + 10x - 20', value: 'x^3 + 2*x^2 + 10*x - 20', category: 'Polinomio' },
-  { label: 'eˣ - 2', value: 'exp(x) - 2', category: 'Exponencial' },
-  { label: 'x² - 2', value: 'x^2 - 2', category: 'Polinomio' },
-  { label: 'cos(x) - x', value: 'cos(x) - x', category: 'Trigonométrica' },
-  { label: 'sin(x) - x/2', value: 'sin(x) - x/2', category: 'Trigonométrica' },
-  { label: 'ln(x) - 1', value: 'log(x) - 1', category: 'Logarítmica' },
+  { label: 'x³ + 2x² + 10x − 20', value: 'x^3 + 2*x^2 + 10*x - 20', category: 'Polinomio' },
+  { label: 'eˣ − 2', value: 'exp(x) - 2', category: 'Exponencial' },
+  { label: 'x² − 2', value: 'x^2 - 2', category: 'Polinomio' },
+  { label: 'cos(x) − x', value: 'cos(x) - x', category: 'Trigonométrica' },
+  { label: 'sin(x) − x/2', value: 'sin(x) - x/2', category: 'Trigonométrica' },
+  { label: 'ln(x) − 1', value: 'log(x) - 1', category: 'Logarítmica' },
 ];
+
+const SYNTAX_HINTS = ['^ potencia', '* multiplicar', 'exp(x)', 'sin/cos', 'sqrt(x)', 'log(x)'];
 
 export function FunctionInput({ value, onChange, error }: FunctionInputProps) {
   const [showExamples, setShowExamples] = useState(false);
@@ -56,7 +59,10 @@ export function FunctionInput({ value, onChange, error }: FunctionInputProps) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="x^3 + 2*x - 5"
-            className={`pl-14 sm:pl-16 font-mono h-10 sm:h-12 text-sm sm:text-base ${error ? 'border-destructive' : ''}`}
+            className={cn(
+              'pl-14 sm:pl-16 font-mono h-10 sm:h-12 text-sm sm:text-base',
+              error && 'border-destructive focus-visible:ring-destructive/30'
+            )}
           />
         </div>
 
@@ -64,9 +70,9 @@ export function FunctionInput({ value, onChange, error }: FunctionInputProps) {
           <p className="text-xs sm:text-sm text-destructive font-medium">{error}</p>
         )}
 
-        {/* Syntax hints - scrollable on mobile */}
+        {/* Hints de sintaxis */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-          {['^ potencia', '* multiplicar', 'exp(x)', 'sin/cos', 'sqrt(x)', 'log(x)'].map((hint) => (
+          {SYNTAX_HINTS.map((hint) => (
             <Badge key={hint} variant="secondary" className="text-[10px] sm:text-xs font-mono whitespace-nowrap flex-shrink-0">
               {hint}
             </Badge>
@@ -74,9 +80,9 @@ export function FunctionInput({ value, onChange, error }: FunctionInputProps) {
         </div>
       </div>
 
-      {/* Examples dropdown */}
+      {/* Panel de ejemplos */}
       {showExamples && (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-1.5 sm:gap-2 p-3 sm:p-4 bg-muted/50 rounded-lg border">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5 sm:gap-2 p-3 sm:p-4 bg-muted/30 rounded-lg border border-border">
           {EXAMPLES.map((example) => (
             <button
               key={example.value}
@@ -84,12 +90,14 @@ export function FunctionInput({ value, onChange, error }: FunctionInputProps) {
                 onChange(example.value);
                 setShowExamples(false);
               }}
-              className="flex flex-col items-start gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg text-left hover:bg-background transition-colors border border-transparent hover:border-border active:scale-[0.98]"
+              className="group flex flex-col items-start gap-0.5 sm:gap-1 p-2.5 sm:p-3 rounded-lg text-left transition-colors border border-transparent hover:border-border hover:bg-card active:scale-[0.98]"
             >
-              <span className="font-mono text-xs sm:text-sm text-foreground truncate w-full">{example.label}</span>
-              <Badge variant="outline" className="text-[10px] sm:text-xs">
+              <span className="font-mono text-xs sm:text-sm text-foreground truncate w-full group-hover:text-foreground">
+                {example.label}
+              </span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground">
                 {example.category}
-              </Badge>
+              </span>
             </button>
           ))}
         </div>
