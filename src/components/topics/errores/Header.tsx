@@ -1,0 +1,56 @@
+import { BlockMath } from '@/components/shared/MathRenderer';
+
+export function ErrorsHeader() {
+  return (
+    <header className="relative overflow-hidden rounded-xl border border-border bg-card">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle, currentColor 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }}
+      />
+
+      <div className="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-start">
+        <div>
+          <div className="mb-3 flex items-baseline gap-3">
+            <span className="font-mono text-4xl font-black tracking-tighter text-border select-none sm:text-5xl">
+              01
+            </span>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+              Fundamentos · Análisis de Error
+            </p>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            Errores y Aproximaciones
+          </h1>
+          <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
+            Calcula errores absoluto, relativo y porcentual. Explora la
+            aproximación por series de Taylor y analiza cómo el truncamiento
+            afecta la precisión del resultado.
+          </p>
+        </div>
+
+        <div className="w-full rounded-lg border border-border bg-muted/30 p-4 lg:max-w-sm">
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Error relativo
+          </p>
+          <div className="overflow-x-auto text-center">
+            <BlockMath math={'E_r = \\frac{|x - \\tilde{x}|}{|x|}'} />
+          </div>
+          <div className="mt-3 border-t border-border pt-3 text-center">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Serie de Taylor
+            </p>
+            <BlockMath
+              math={"f(x) \\approx \\sum_{k=0}^{n} \\frac{f^{(k)}(a)}{k!}(x-a)^k"}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
+    </header>
+  );
+}

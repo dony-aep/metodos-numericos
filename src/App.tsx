@@ -4,6 +4,10 @@ import { AppLayout } from '@/components/shared/AppLayout';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { MethodPage } from '@/pages/MethodPage';
 
+const ErrorsPage = lazy(() => import('@/pages/ErrorsPage'));
+const NonlinearPage = lazy(() => import('@/pages/NonlinearPage'));
+const BisectionPage = lazy(() => import('@/pages/BisectionPage'));
+const NewtonRaphsonPage = lazy(() => import('@/pages/NewtonRaphsonPage'));
 const SecantMethodPage = lazy(() => import('@/pages/SecantMethodPage'));
 const LinearSystemsPage = lazy(() => import('@/pages/LinearSystemsPage'));
 const GaussEliminationPage = lazy(() => import('@/pages/GaussEliminationPage'));
@@ -30,6 +34,10 @@ function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="metodos/errores-aproximaciones" element={<Suspense fallback={<PageFallback />}><ErrorsPage /></Suspense>} />
+          <Route path="metodos/ecuaciones-no-lineales" element={<Suspense fallback={<PageFallback />}><NonlinearPage /></Suspense>} />
+          <Route path="metodos/biseccion" element={<Suspense fallback={<PageFallback />}><BisectionPage /></Suspense>} />
+          <Route path="metodos/newton-raphson" element={<Suspense fallback={<PageFallback />}><NewtonRaphsonPage /></Suspense>} />
           <Route path="metodos/secante" element={<Suspense fallback={<PageFallback />}><SecantMethodPage /></Suspense>} />
           <Route path="metodos/sistemas-lineales" element={<Suspense fallback={<PageFallback />}><LinearSystemsPage /></Suspense>} />
           <Route path="metodos/eliminacion-gauss" element={<Suspense fallback={<PageFallback />}><GaussEliminationPage /></Suspense>} />

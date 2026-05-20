@@ -1,0 +1,32 @@
+Clase 1 – 25 de February de 2026
+Tema: Errores y aproximaciones numéricas
+ Clase 2 – 04 de March de 2026
+Tema: Métodos de solución de ecuaciones no lineales
+ Clase 3 – 11 de March de 2026
+Tema: Método de bisección
+ Clase 4 – 18 de March de 2026
+Tema: Método de Newton-Raphson
+ Clase 5 – 25 de March de 2026
+Tema: Método de la secante
+ Clase 6 – 01 de April de 2026
+Tema: Sistemas de ecuaciones lineales
+ Clase 7 – 08 de April de 2026
+Tema: Método de eliminación de Gauss
+Clase 8 – 15 de April de 2026
+Tema: Métodos iterativos (Jacobi y Gauss-Seidel)
+ Clase 9 – 22 de April de 2026
+Tema: Interpolación polinómica
+ Clase 10 – 29 de April de 2026
+Tema: Diferencias divididas de Newton
+ Clase 11 – 06 de May de 2026
+Tema: Interpolación de Lagrange
+Clase 12 – 13 de May de 2026
+Tema: Ajuste por mínimos cuadrados
+ Clase 13 – 20 de May de 2026
+Tema: Derivación numérica
+Clase 14 – 27 de May de 2026
+Tema: Integración numérica (Trapecio y Simpson)
+ Clase 15 – 03 de June de 2026
+Tema: Ecuaciones diferenciales ordinarias (Euler)
+Clase 16 – 10 de June de 2026
+Tema: Repaso general y evaluación final
