@@ -28,6 +28,7 @@ Todos los cambios importantes de este proyecto se documentan aquí.
 
 ### Changed
 - Dashboard actualizado a 15 módulos disponibles (cobertura completa del plan de clase).
+- Footer rediseñado con créditos del desarrollador (portafolio y GitHub) e iconos adaptativos al tema.
 
 ## [0.2.0] - 2026-04-15
 
