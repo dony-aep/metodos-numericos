@@ -2,6 +2,33 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
+## [0.3.0] - 2026-05-20
+
+### Added
+- Módulo completo de **Errores y aproximaciones numéricas** (`/metodos/errores-aproximaciones`):
+  - Calculadora de error absoluto, relativo, porcentual y cifras significativas,
+  - Aproximación por series de Taylor con tabla de convergencia y gráfica,
+  - Teoría de fuentes de error, condicionamiento y estabilidad.
+- Módulo completo de **Métodos de ecuaciones no lineales** (`/metodos/ecuaciones-no-lineales`):
+  - Comparador simultáneo de bisección, Newton-Raphson y secante,
+  - Gráfica de convergencia comparativa (error vs iteración),
+  - Tablas de iteraciones por método,
+  - Teoría de clasificación, fórmulas y criterios de parada.
+- Módulo completo de **Método de bisección** (`/metodos/biseccion`):
+  - Calculadora con intervalo [a, b], tolerancia y máx. iteraciones,
+  - Gráfica de f(x) con raíz marcada y gráfica de convergencia del error,
+  - Tabla de iteraciones (n, a, b, c, f(c), error),
+  - Teoría del Teorema del Valor Intermedio, cota del error y ventajas/desventajas.
+- Módulo completo de **Método de Newton-Raphson** (`/metodos/newton-raphson`):
+  - Calculadora con f(x), f'(x) (opcional, numérica por defecto) y x₀,
+  - Gráfica de f(x) con raíz y gráfica de convergencia,
+  - Tabla de iteraciones (n, xₙ, f(xₙ), f'(xₙ₋₁), error),
+  - Teoría de interpretación geométrica, convergencia cuadrática y casos de falla.
+- Documentación en `docs/` para los 4 temas nuevos.
+
+### Changed
+- Dashboard actualizado a 15 módulos disponibles (cobertura completa del plan de clase).
+
 ## [0.2.0] - 2026-04-15
 
 ### Added
