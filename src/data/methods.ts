@@ -106,6 +106,13 @@ export const NUMERICAL_METHODS: NumericalMethod[] = [
       'Método de Euler para aproximar la solución de problemas de valor inicial.',
     status: 'available',
   },
+  {
+    slug: 'difusion-calor',
+    title: 'Ecuación de difusión del calor (EDP)',
+    shortDescription:
+      'Esquema explícito FTCS por diferencias finitas para la ecuación del calor en 1D.',
+    status: 'available',
+  },
 ];
 
 export function getMethodBySlug(slug: string) {

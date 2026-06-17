@@ -11,6 +11,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    watch: {
+      ignored: ['**/.vs/**'],
+    },
+  },
   build: {
     chunkSizeWarningLimit: 3000,
   },

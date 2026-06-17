@@ -37,6 +37,7 @@ Estado actual confirmado:
 9. Derivación numérica
 10. Integración numérica (Trapecio y Simpson)
 11. Ecuaciones diferenciales ordinarias (Euler)
+12. Ecuación de difusión del calor (EDP) — esquema explícito FTCS
 
 ## Decisión de arquitectura (actualizada)
 - Usar `"/"` como dashboard principal.
@@ -63,6 +64,7 @@ Rutas base propuestas:
 - `/metodos/derivacion-numerica`
 - `/metodos/integracion-numerica`
 - `/metodos/euler`
+- `/metodos/difusion-calor`
 
 ## Estructura objetivo
 - `src/pages/` -> páginas de dashboard y métodos
@@ -106,6 +108,7 @@ Rutas base propuestas:
 - [x] Derivación numérica
 - [x] Integración numérica (Trapecio y Simpson)
 - [x] EDOs (Euler)
+- [x] Ecuación de difusión del calor (EDP) — FTCS explícito
 
 ### Fase 5 - Cierre técnico
 - [x] Implementar modo oscuro global (selector claro/oscuro/sistema + theming base)
@@ -127,6 +130,7 @@ Rutas base propuestas:
 - [x] Derivación numérica
 - [x] Integración numérica (Trapecio y Simpson)
 - [x] EDOs (Euler)
+- [x] Ecuación de difusión del calor (EDP)
 
 ## Criterio de "hecho" por tema
 Un tema se marca implementado cuando cumple:

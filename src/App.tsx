@@ -19,6 +19,7 @@ const LeastSquaresPage = lazy(() => import('@/pages/LeastSquaresPage'));
 const NumericalDiffPage = lazy(() => import('@/pages/NumericalDiffPage'));
 const NumericalIntegrationPage = lazy(() => import('@/pages/NumericalIntegrationPage'));
 const EulerPage = lazy(() => import('@/pages/EulerPage'));
+const HeatDiffusionPage = lazy(() => import('@/pages/HeatDiffusionPage'));
 
 function PageFallback() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="metodos/derivacion-numerica" element={<Suspense fallback={<PageFallback />}><NumericalDiffPage /></Suspense>} />
           <Route path="metodos/integracion-numerica" element={<Suspense fallback={<PageFallback />}><NumericalIntegrationPage /></Suspense>} />
           <Route path="metodos/euler" element={<Suspense fallback={<PageFallback />}><EulerPage /></Suspense>} />
+          <Route path="metodos/difusion-calor" element={<Suspense fallback={<PageFallback />}><HeatDiffusionPage /></Suspense>} />
           <Route path="metodos/:slug" element={<MethodPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
