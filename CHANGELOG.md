@@ -2,6 +2,17 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
+## [0.4.0] - 2026-06-17
+
+### Added
+- Módulo completo de **Ecuación de difusión del calor (EDP)** (`/metodos/difusion-calor`):
+  - Solución de la ecuación del calor 1D con esquema explícito FTCS (diferencias finitas),
+  - Visualización con mapa de calor (heatmap) y gráfica de perfiles de temperatura,
+  - 6 presets didácticos: senoidal, pico central, inestable, equilibrio térmico, difusión rápida y pulso localizado,
+  - Teoría con fórmulas KaTeX: EDP, discretización, FTCS, condición de estabilidad, comparación de esquemas y aplicaciones,
+  - Card de relación con otros temas del curso (derivación, Euler, sistemas lineales, Jacobi/Gauss-Seidel).
+- Análisis numérico detallado del método en `docs/difusion_de_calor_edp/`.
+
 ## [0.3.0] - 2026-05-20
 
 ### Added

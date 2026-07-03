@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# Métodos Numéricos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web interactiva para aprender y experimentar con métodos numéricos. Cada módulo combina **teoría** (fórmulas con notación matemática), una **calculadora interactiva** paso a paso y **visualizaciones gráficas** de los resultados y la convergencia.
 
-Currently, two official plugins are available:
+🔗 **Demo**: desplegada con Vercel.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Módulos disponibles
 
-## React Compiler
+### Errores y fundamentos
+- **Errores y aproximaciones numéricas**: error absoluto, relativo, porcentual, cifras significativas y series de Taylor.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Ecuaciones no lineales
+- **Bisección**, **Newton-Raphson** y **Secante**, con un comparador simultáneo de convergencia entre los tres métodos.
 
-## Expanding the ESLint configuration
+### Sistemas de ecuaciones lineales
+- **Eliminación de Gauss** (con pivoteo) y métodos iterativos de **Jacobi y Gauss-Seidel**.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Interpolación y ajuste
+- **Interpolación de Lagrange**, **diferencias divididas de Newton** y **mínimos cuadrados**.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Cálculo numérico
+- **Derivación numérica** (diferencias finitas) e **integración numérica** (trapecio, Simpson).
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Ecuaciones diferenciales
+- **Método de Euler** para EDOs.
+- **Difusión del calor (EDP)**: solución de la ecuación del calor 1D por diferencias finitas, con análisis numérico detallado en [`docs/difusion_de_calor_edp/`](docs/difusion_de_calor_edp/).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tecnologías
+
+- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vite.dev/)
+- [Tailwind CSS](https://tailwindcss.com/) + [Base UI](https://base-ui.com/) para la interfaz
+- [ECharts](https://echarts.apache.org/) para las gráficas interactivas
+- [math.js](https://mathjs.org/) para la evaluación de expresiones matemáticas
+- [KaTeX](https://katex.org/) para el renderizado de fórmulas
+
+## Desarrollo local
+
+Requisitos: Node.js 20+.
+
+```bash
+npm install      # instalar dependencias
+npm run dev      # servidor de desarrollo
+npm run build    # build de producción
+npm run lint     # linter
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Estructura del proyecto
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/
+│   ├── topics/      # Módulos por método numérico (teoría + calculadora + gráficas)
+│   ├── shared/      # Componentes compartidos
+│   └── ui/          # Componentes base de interfaz
+├── pages/           # Páginas de cada método
+├── hooks/           # Hooks personalizados
+├── lib/ y utils/    # Lógica de cálculo y utilidades
+docs/                # Documentación y análisis numérico de los métodos
+```
+
+## Documentación
+
+El historial de cambios está en [CHANGELOG.md](CHANGELOG.md) y la documentación teórica de los métodos en la carpeta [`docs/`](docs/).
