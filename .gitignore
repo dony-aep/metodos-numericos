@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Claude Code: ajustes personales de cada máquina.
+# La configuración compartida del proyecto va en .claude/settings.json
+.claude/settings.local.json
+CLAUDE.local.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
