@@ -2,6 +2,29 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
+## [Unreleased]
+
+### Security
+- Resueltas 8 de las 10 vulnerabilidades reportadas por `npm audit`, incluidas las 2 alertas
+  abiertas de Dependabot (`brace-expansion` alta, `@hono/node-server` media):
+  - `brace-expansion`, `postcss`, `js-yaml`, `fast-uri` y `body-parser` actualizadas a sus
+    versiones parcheadas (transitivas, sin cambios de API),
+  - `react-router-dom` actualizado a 7.18.1, que corrige el open redirect vía backslash,
+    el XSS de `RSCErrorHandler`, la inyección de constructor en `deserializeErrors()` y el
+    DoS por route matching ineficiente.
+- Añadido `overrides` de `@hono/node-server` a `^2.0.5` para forzar la versión parcheada
+  (path traversal en `serve-static`) dentro de `@modelcontextprotocol/sdk`, del que depende
+  el CLI `shadcn`. Upstream aún declara `^1.19.9`, por lo que el override es necesario hasta
+  que el SDK suba de major. Verificado que el CLI sigue funcionando.
+
+### Notes
+- `GHSA-qwww-vcr4-c8h2` (CSRF en modo RSC de react-router) se mantiene sin aplicar: el aviso
+  solo afecta al modo RSC y esta app es una SPA estática con `BrowserRouter` declarativo, sin
+  SSR ni `loaders`/`actions`, por lo que el código vulnerable no es alcanzable. La corrección
+  que propone `npm audit fix --force` es una **degradación** a `react-router-dom@7.11.0`, que
+  reintroduciría las cuatro vulnerabilidades corregidas arriba. La solución real es migrar a
+  `react-router@8`, pendiente por ser un cambio de major de la librería de rutas.
+
 ## [0.4.0] - 2026-06-17
 
 ### Added
