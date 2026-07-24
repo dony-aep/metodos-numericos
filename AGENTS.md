@@ -3,18 +3,21 @@
 ## Propósito del repositorio
 Construir una plataforma web educativa de métodos numéricos en español, con dashboard principal y módulos por tema que incluyan teoría, fórmulas, calculadora y visualización de resultados.
 
-## Stack oficial (versiones exactas)
-- React `19.2.4` + React DOM `19.2.4`
-- Vite `8.0.4`
-- TypeScript `~6.0.2`
-- Tailwind CSS `^4.2.2` (con `@tailwindcss/vite`)
-- shadcn CLI `^4.2.0` + `@base-ui/react ^1.3.0`
-- ECharts `^6.0.0` + `echarts-for-react ^3.0.6`
-- mathjs `^15.2.0` + KaTeX `^0.16.45`
-- react-router-dom `^7.14.0`
-- lucide-react `^1.7.0`
-- next-themes `^0.4.6`
-- Fuente: Google Sans (vía CDN de Google Fonts)
+## Stack oficial
+- React + React DOM
+- Vite
+- TypeScript
+- Tailwind CSS (con `@tailwindcss/vite`)
+- shadcn CLI + `@base-ui/react`
+- ECharts + `echarts-for-react`
+- mathjs + KaTeX
+- react-router-dom
+- lucide-react
+- next-themes
+- Fuente: Google Sans (declarada en `src/index.css`)
+
+**Las versiones exactas viven en `package.json`, que es la fuente de verdad.** No las dupliques
+aquí: se desfasan en cada actualización de dependencias.
 
 ## Estructura objetivo
 - `src/pages/` -> dashboard y páginas por método

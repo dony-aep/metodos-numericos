@@ -5,11 +5,6 @@
 Lo anterior (`AGENTS.md`) define stack, estructura, convenciones, comandos y formato de
 commits. Esta sección añade solo lo que no se deduce leyendo el código.
 
-## Fuente de verdad de las versiones
-
-`package.json` manda sobre la lista "Stack oficial" de `AGENTS.md`, que se desactualiza con
-cada bump de dependencias. Verifica ahí antes de afirmar una versión.
-
 ## Agregar un método numérico
 
 Cada tema se implementa en cinco capas separadas. **IMPORTANTE:** no pongas lógica de cálculo
