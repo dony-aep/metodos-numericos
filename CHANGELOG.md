@@ -17,13 +17,15 @@ Todos los cambios importantes de este proyecto se documentan aquí.
   el CLI `shadcn`. Upstream aún declara `^1.19.9`, por lo que el override es necesario hasta
   que el SDK suba de major. Verificado que el CLI sigue funcionando.
 
-### Notes
-- `GHSA-qwww-vcr4-c8h2` (CSRF en modo RSC de react-router) se mantiene sin aplicar: el aviso
-  solo afecta al modo RSC y esta app es una SPA estática con `BrowserRouter` declarativo, sin
-  SSR ni `loaders`/`actions`, por lo que el código vulnerable no es alcanzable. La corrección
-  que propone `npm audit fix --force` es una **degradación** a `react-router-dom@7.11.0`, que
-  reintroduciría las cuatro vulnerabilidades corregidas arriba. La solución real es migrar a
-  `react-router@8`, pendiente por ser un cambio de major de la librería de rutas.
+- Migración a **react-router 8.3.0**, primera versión fuera del rango vulnerable de
+  `GHSA-qwww-vcr4-c8h2` (CSRF en modo RSC), que cierra la última alerta abierta de Dependabot.
+  Con esto `npm audit` queda en **0 vulnerabilidades**.
+
+### Changed
+- `react-router-dom` se elimina como dependencia: en la v8 el paquete desaparece y todo se
+  importa desde `react-router`. Actualizados los 4 archivos que lo usaban (`App.tsx`,
+  `AppLayout.tsx`, `DashboardPage.tsx`, `MethodPage.tsx`); las APIs en uso no cambian de firma.
+- `react` y `react-dom` suben a 19.2.8 para cumplir el peer `>=19.2.7` de react-router 8.
 
 ## [0.4.0] - 2026-06-17
 

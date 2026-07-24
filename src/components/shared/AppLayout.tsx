@@ -1,5 +1,5 @@
 import { BookOpenCheck, Globe, Sigma } from 'lucide-react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router';
 import { NUMERICAL_METHODS } from '@/data/methods';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';

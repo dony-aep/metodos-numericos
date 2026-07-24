@@ -43,15 +43,11 @@ vista en claro y oscuro.
 
 ## Dependencias y seguridad
 
-**IMPORTANTE: nunca ejecutes `npm audit fix --force` en este repo.** Su "arreglo" para el aviso
-abierto de react-router es degradar a `react-router-dom@7.11.0`, que reintroduce cuatro
-vulnerabilidades ya corregidas (open redirect, XSS, inyección de constructor, DoS).
+`npm audit` está en cero. Si aparece un aviso, revisa qué propone antes de aplicarlo:
+`npm audit fix --force` degrada versiones y puede reintroducir vulnerabilidades ya corregidas.
 
-- El aviso restante (`GHSA-qwww-vcr4-c8h2`) solo afecta al modo RSC. Esta app es una SPA
-  estática con `BrowserRouter` declarativo, sin SSR ni `loaders`/`actions`, así que no aplica.
-  El detalle está en la sección `[Unreleased]` del `CHANGELOG.md`.
-- El campo `overrides` de `package.json` fuerza `@hono/node-server` parcheado dentro del CLI de
-  shadcn. No lo borres hasta que `@modelcontextprotocol/sdk` suba de major.
+El campo `overrides` de `package.json` fuerza `@hono/node-server` parcheado dentro del CLI de
+shadcn. No lo borres hasta que `@modelcontextprotocol/sdk` suba de major.
 
 ## Entorno
 
@@ -60,6 +56,10 @@ con `/` en el código y comandos de PowerShell en la terminal.
 
 ## Detalles con trampa
 
+- **El proyecto usa react-router v8, donde `react-router-dom` ya no existe.** Importa siempre
+  desde `react-router` (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`,
+  `Navigate`, `useParams`). Solo las APIs de DOM tipo `RouterProvider` salen de
+  `react-router/dom`, y hoy no se usa ninguna.
 - Las gráficas de ECharts fijan `fontFamily: 'Google Sans'` en línea, tema por tema. Si cambias
   la tipografía en `src/index.css`, esas cadenas no se actualizan solas.
 - `MethodPage` es pantalla de relleno para slugs registrados pero sin implementar, no una página

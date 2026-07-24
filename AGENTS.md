@@ -11,7 +11,7 @@ Construir una plataforma web educativa de métodos numéricos en español, con d
 - shadcn CLI + `@base-ui/react`
 - ECharts + `echarts-for-react`
 - mathjs + KaTeX
-- react-router-dom
+- react-router (v8; `react-router-dom` ya no existe)
 - lucide-react
 - next-themes
 - Fuente: Google Sans (declarada en `src/index.css`)
