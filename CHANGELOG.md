@@ -2,30 +2,37 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
-## [Unreleased]
+## [0.4.1] - 2026-07-24
+
+Versión de mantenimiento: sin módulos ni funcionalidad nueva. Deja el proyecto en
+**0 vulnerabilidades** (`npm audit`) y **0 alertas abiertas** de Dependabot.
 
 ### Security
-- Resueltas 8 de las 10 vulnerabilidades reportadas por `npm audit`, incluidas las 2 alertas
-  abiertas de Dependabot (`brace-expansion` alta, `@hono/node-server` media):
+- Resueltas las 10 vulnerabilidades reportadas por `npm audit`:
   - `brace-expansion`, `postcss`, `js-yaml`, `fast-uri` y `body-parser` actualizadas a sus
     versiones parcheadas (transitivas, sin cambios de API),
-  - `react-router-dom` actualizado a 7.18.1, que corrige el open redirect vía backslash,
-    el XSS de `RSCErrorHandler`, la inyección de constructor en `deserializeErrors()` y el
-    DoS por route matching ineficiente.
+  - `react-router` actualizado, corrigiendo el open redirect vía backslash, el XSS de
+    `RSCErrorHandler`, la inyección de constructor en `deserializeErrors()`, el DoS por route
+    matching ineficiente y el CSRF de modo RSC (`GHSA-qwww-vcr4-c8h2`).
 - Añadido `overrides` de `@hono/node-server` a `^2.0.5` para forzar la versión parcheada
   (path traversal en `serve-static`) dentro de `@modelcontextprotocol/sdk`, del que depende
   el CLI `shadcn`. Upstream aún declara `^1.19.9`, por lo que el override es necesario hasta
   que el SDK suba de major. Verificado que el CLI sigue funcionando.
 
-- Migración a **react-router 8.3.0**, primera versión fuera del rango vulnerable de
-  `GHSA-qwww-vcr4-c8h2` (CSRF en modo RSC), que cierra la última alerta abierta de Dependabot.
-  Con esto `npm audit` queda en **0 vulnerabilidades**.
-
 ### Changed
-- `react-router-dom` se elimina como dependencia: en la v8 el paquete desaparece y todo se
-  importa desde `react-router`. Actualizados los 4 archivos que lo usaban (`App.tsx`,
-  `AppLayout.tsx`, `DashboardPage.tsx`, `MethodPage.tsx`); las APIs en uso no cambian de firma.
+- Migración a **react-router 8.3.0**, primera versión fuera del rango vulnerable de
+  `GHSA-qwww-vcr4-c8h2`. `react-router-dom` se elimina como dependencia porque el paquete
+  desaparece en la v8: los 4 archivos que lo usaban (`App.tsx`, `AppLayout.tsx`,
+  `DashboardPage.tsx`, `MethodPage.tsx`) ahora importan de `react-router`, sin cambios de firma.
 - `react` y `react-dom` suben a 19.2.8 para cumplir el peer `>=19.2.7` de react-router 8.
+- Eliminada la dependencia sin uso `@fontsource-variable/geist`, sobrante de la migración a
+  Google Sans de la 0.2.0.
+
+### Documentation
+- Añadido `CLAUDE.md` con instrucciones para Claude Code, que importa `AGENTS.md` en lugar de
+  duplicarlo.
+- `AGENTS.md` deja de fijar versiones exactas del stack: se desfasaban en cada actualización de
+  dependencias y ahora remite a `package.json`.
 
 ## [0.4.0] - 2026-06-17
 

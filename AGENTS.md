@@ -77,6 +77,22 @@ aquí: se desfasan en cada actualización de dependencias.
 - Rama por defecto: `main`.
 - El proyecto se trabaja directamente en esta carpeta (sin subcarpetas anidadas de framework).
 
+## Skills: mantener los dos directorios en espejo
+Los skills viven duplicados porque cada harness lee su propia ruta:
+
+- `.claude/skills/` — la que lee Claude Code.
+- `.agents/skills/` — la que leen los demás agentes.
+
+**IMPORTANTE: al crear, editar o borrar un skill hay que aplicar el mismo cambio en las dos
+rutas, en el mismo commit.** Si solo se toca una, los agentes empiezan a comportarse distinto
+según cuál se haya usado, y la diferencia no da ningún error visible.
+
+Comprobar antes de commitear que no hay diferencias:
+
+```bash
+diff -r .agents/skills .claude/skills   # sin salida = en espejo
+```
+
 ## Comandos del proyecto
 ```bash
 npm run dev       # servidor local (Vite)
