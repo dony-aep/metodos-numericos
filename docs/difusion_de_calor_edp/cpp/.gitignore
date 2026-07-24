@@ -1,0 +1,7 @@
+build/
+out/
+vcpkg_installed/
+*.csv
+
+# Estado de la ventana de ImGui, se regenera al ejecutar
+imgui.ini

@@ -1,0 +1,9 @@
+{
+  "name": "difusion-calor-cpp",
+  "version-string": "0.1.0",
+  "dependencies": [
+    { "name": "imgui", "features": ["glfw-binding", "opengl3-binding"] },
+    "implot",
+    "glfw3"
+  ]
+}
