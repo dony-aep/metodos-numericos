@@ -35,7 +35,7 @@ Aplicación web interactiva para aprender y experimentar con métodos numéricos
 
 ## Desarrollo local
 
-Requisitos: Node.js 20+.
+Requisitos: Node.js 22.22+ (lo exige react-router 8).
 
 ```bash
 npm install      # instalar dependencias
@@ -57,6 +57,14 @@ src/
 ├── lib/ y utils/    # Lógica de cálculo y utilidades
 docs/                # Documentación y análisis numérico de los métodos
 ```
+
+## Convenciones del repositorio
+
+Los commits siguen [Conventional Commits](https://www.conventionalcommits.org/es/) en español — ver el skill `git-commit` en [`.claude/skills/`](.claude/skills/).
+
+Los skills están duplicados en [`.claude/skills/`](.claude/skills/) y [`.agents/skills/`](.agents/skills/) porque cada herramienta de agentes lee su propia ruta: los dos árboles son idénticos byte a byte y deben seguir así. Si editas uno, replica el cambio en el otro dentro del mismo commit y compruébalo con `diff -r .agents/skills .claude/skills`.
+
+Las instrucciones completas para agentes están en [AGENTS.md](AGENTS.md), que [CLAUDE.md](CLAUDE.md) importa para no duplicarlas.
 
 ## Documentación
 
