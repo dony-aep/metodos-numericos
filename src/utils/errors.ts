@@ -9,12 +9,10 @@ export function computeErrors(input: ErrorsInput): ErrorsResult {
   const percentageError = relativeError * 100;
 
   // Significant digits: n where relative error < 0.5 * 10^(2-n)
-  let significantDigits = 0;
-  if (relativeError > 0) {
-    significantDigits = Math.max(0, Math.floor(-Math.log10(2 * relativeError)));
-  } else {
-    significantDigits = 16; // máxima precisión de punto flotante
-  }
+  const significantDigits =
+    relativeError > 0
+      ? Math.max(0, Math.floor(-Math.log10(2 * relativeError)))
+      : 16; // máxima precisión de punto flotante
 
   return {
     exactValue,

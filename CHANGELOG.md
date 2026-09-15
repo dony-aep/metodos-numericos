@@ -2,6 +2,42 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
+## [0.4.2] - 2026-09-15
+
+Versión de mantenimiento: sin módulos ni funcionalidad nueva. Pone el stack al día y vuelve a
+dejar el proyecto en **0 vulnerabilidades** (`npm audit`) y **0 alertas abiertas** de Dependabot.
+
+### Security
+- Cerradas las 11 alertas de Dependabot, 9 avisos en `npm audit` (4 altas, 4 moderadas y 1 baja).
+  Todas venían de dependencias transitivas del toolchain de build y lint: `browserslist`,
+  `fast-uri`, `js-yaml`, `nanoid`, `qs`, `hono`, `@humanfs/node`, `baseline-browser-mapping` y
+  `postcss-selector-parser`. Las arrastran las actualizaciones de los paquetes directos, sin
+  forzar ninguna versión.
+
+### Changed
+- Stack al día en sus últimas versiones compatibles: `react` y `react-dom` 19.3.0,
+  `react-router` 8.4.0, `vite` 8.3.0, `tailwindcss` y `@tailwindcss/vite` 4.3.3,
+  `@base-ui/react` 1.8.0, `lucide-react` 1.46.0, `shadcn` 4.21.0, `typescript-eslint` 8.70.0 y
+  `@vitejs/plugin-react` 6.1.1.
+- **ESLint sube a 10.10.0**, porque npm ya marca la serie 9 como fuera de soporte. La
+  configuración plana de `eslint.config.js` no necesita cambios y los cuatro plugins ya declaran
+  el peer `^10`. Su regla nueva `no-useless-assignment` destapó una asignación muerta en
+  `computeErrors()`: el `let significantDigits = 0` que las dos ramas sobrescribían pasa a ser un
+  `const` con ternario, sin cambio de comportamiento.
+- **KaTeX sube a 0.18.7.** La versión renombra las clases CSS internas del renderizado, pero el
+  proyecto solo usa `renderToString` y la hoja de estilos del propio paquete, así que no hubo que
+  tocar nada. Fórmulas comprobadas en claro y oscuro.
+- `package.json` abandona el `version: 0.0.0` heredado de la plantilla de Vite y pasa a seguir al
+  CHANGELOG.
+
+### Removed
+- Eliminado el `overrides` de `@hono/node-server`. `@modelcontextprotocol/sdk` ya declara
+  `^1.19.9 || ^2.0.5`, npm resuelve 2.1.1 por su cuenta y el audit sale limpio en las dos ramas,
+  así que el pin solo frenaba parches.
+
+### Documentation
+- El README describe las convenciones del repositorio.
+
 ## [0.4.1] - 2026-07-24
 
 Versión de mantenimiento: sin módulos ni funcionalidad nueva. Deja el proyecto en
