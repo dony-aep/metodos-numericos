@@ -1,71 +1,132 @@
 # Métodos Numéricos
 
-Aplicación web interactiva para aprender y experimentar con métodos numéricos. Cada módulo combina **teoría** (fórmulas con notación matemática), una **calculadora interactiva** paso a paso y **visualizaciones gráficas** de los resultados y la convergencia.
+Dieciséis métodos numéricos, cada uno explicado y ejecutable en el navegador. Metes tus
+propios parámetros, ves la tabla de iteraciones y la gráfica de convergencia, y de paso
+descubres en qué condiciones el método te va a mentir.
 
-🔗 **Demo**: desplegada con Vercel.
+**[metodos-numericos-lovat.vercel.app](https://metodos-numericos-lovat.vercel.app)**
 
-## Módulos disponibles
+La mayoría de los apuntes de análisis numérico enseñan la fórmula y se van. Aquí cada
+módulo intenta responder también por qué existe: de dónde salen los pesos 1, 4, 1 de
+Simpson, por qué la diferencia centrada gana un orden sobre la unilateral sin costar una
+evaluación más, por qué mínimos cuadrados eleva al cuadrado en vez de tomar el valor
+absoluto.
 
-### Errores y fundamentos
-- **Errores y aproximaciones numéricas**: error absoluto, relativo, porcentual, cifras significativas y series de Taylor.
+## Qué trae cada módulo
 
-### Ecuaciones no lineales
-- **Bisección**, **Newton-Raphson** y **Secante**, con un comparador simultáneo de convergencia entre los tres métodos.
+**Una ficha.** Orden de convergencia, coste por iteración y qué necesita el método para
+arrancar. Sirve para decidir cuál usar antes de leer nada más.
 
-### Sistemas de ecuaciones lineales
-- **Eliminación de Gauss** (con pivoteo) y métodos iterativos de **Jacobi y Gauss-Seidel**.
+**Cuándo falla.** Todo método tiene un caso que lo rompe, y esa suele ser la parte que no
+aparece en los apuntes. Newton-Raphson diverge si la derivada se acerca a cero, Gauss sin
+pivoteo pierde todas las cifras con un pivote minúsculo, el esquema explícito del calor
+explota en cuanto λ pasa de ½. Cada módulo lo cuenta, y donde tiene sentido hay un botón
+que carga los parámetros exactos para que lo veas fallar.
 
-### Interpolación y ajuste
-- **Interpolación de Lagrange**, **diferencias divididas de Newton** y **mínimos cuadrados**.
+**Una calculadora.** Expresiones matemáticas escritas a mano, validación de la entrada y
+la tabla de iteraciones completa, con la columna de error en escala logarítmica para que
+la convergencia se lea como una escalera.
 
-### Cálculo numérico
-- **Derivación numérica** (diferencias finitas) e **integración numérica** (trapecio, Simpson).
+**Gráficas.** La función y sus iteraciones, la convergencia, el mapa de calor de la EDP.
+Con colores verificados para daltonismo, porque ahí el color sí es información.
 
-### Ecuaciones diferenciales
-- **Método de Euler** para EDOs.
-- **Difusión del calor (EDP)**: solución de la ecuación del calor 1D por diferencias finitas, con análisis numérico detallado en [`docs/difusion_de_calor_edp/`](docs/difusion_de_calor_edp/).
+**Teoría.** Prosa, no una lista de fórmulas. Los métodos se enlazan entre ellos donde
+comparten maquinaria: la ecuación del calor, por ejemplo, es derivación numérica en el
+espacio, Euler en el tiempo y un sistema tridiagonal en cada paso si lo resuelves de forma
+implícita.
 
-## Tecnologías
+## Los métodos
 
-- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vite.dev/)
-- [Tailwind CSS](https://tailwindcss.com/) + [Base UI](https://base-ui.com/) para la interfaz
-- [ECharts](https://echarts.apache.org/) para las gráficas interactivas
-- [math.js](https://mathjs.org/) para la evaluación de expresiones matemáticas
-- [KaTeX](https://katex.org/) para el renderizado de fórmulas
+| Familia | Métodos |
+| --- | --- |
+| Fundamentos | Errores y aproximaciones, cifras significativas, series de Taylor |
+| Raíces de ecuaciones | Bisección, Newton-Raphson, secante, y un comparador de los tres a la vez |
+| Sistemas lineales | Eliminación de Gauss con pivoteo, Jacobi y Gauss-Seidel |
+| Interpolación y ajuste | Lagrange, diferencias divididas de Newton, mínimos cuadrados |
+| Cálculo numérico | Derivación por diferencias finitas, integración por trapecio y Simpson |
+| Ecuaciones diferenciales | Euler para EDO, difusión del calor 1D para EDP |
+
+La difusión del calor tiene además una
+[implementación en C++](docs/difusion_de_calor_edp/cpp/) con CMake y vcpkg, por si quieres
+comparar contra algo compilado.
+
+## El diseño
+
+La interfaz imita una página de cuaderno con márgenes: una columna a la izquierda que
+nombra lo que tiene al lado, líneas finas en lugar de cajas, y una paleta monocroma cálida.
+Ni una tarjeta con sombra, ni una insignia redondeada.
+
+La interfaz no tiene color de acento. Las gráficas sí, porque ahí sirve para distinguir una
+serie de otra. Las convenciones completas están en [AGENTS.md](AGENTS.md).
+
+## Cómo está construido
+
+React 19 y TypeScript sobre Vite. Tailwind CSS 4 con componentes de shadcn/ui montados
+sobre [Base UI](https://base-ui.com/). [ECharts](https://echarts.apache.org/) para las
+gráficas, [math.js](https://mathjs.org/) para evaluar las expresiones que escribe el
+usuario y [KaTeX](https://katex.org/) para las fórmulas. Enrutado con react-router 8 y
+desplegado en Vercel.
+
+Las versiones exactas están en [package.json](package.json), que es la única fuente fiable:
+repetirlas aquí solo garantiza que queden desactualizadas.
 
 ## Desarrollo local
 
-Requisitos: Node.js 22.22+ (lo exige react-router 8).
+Necesitas Node 22.22 o superior, que es lo que exige react-router 8.
 
 ```bash
-npm install      # instalar dependencias
-npm run dev      # servidor de desarrollo
-npm run build    # build de producción
-npm run lint     # linter
+npm install --allow-remote=all   # ver la nota de abajo
+npm run dev                      # servidor de desarrollo
+npm run build                    # tsc -b && vite build
+npm run lint                     # eslint, no debe imprimir nada
+npm run preview                  # sirve el build de producción
+npm run icons                    # regenera los iconos desde public/favicon.svg
 ```
 
-## Estructura del proyecto
+Lo de `--allow-remote=all` no es capricho. Con npm 12 en adelante, `npm install` aquí falla
+con `EALLOWREMOTE`: el paquete `@tailwindcss/oxide-wasm32-wasi` trae `bundleDependencies` y
+los valores por defecto de npm bloquean su tarball. Es una dependencia opcional de wasm32
+que en Windows x64 ni siquiera se instala, pero aborta el comando igual. Solo hace falta en
+los comandos que reconstruyen el árbol (`install`, `update`, `audit fix`); `npm ci` y el
+build no se ven afectados. No lo metas en un `.npmrc`, porque eso desactivaría la
+protección también en CI.
+
+No hay tests ni runner de tests. Un cambio está listo cuando `npm run lint` y
+`npm run build` pasan y la página se ve bien en claro y en oscuro.
+
+## Cómo se organiza el código
+
+Cada método se reparte en cinco capas, y la lógica de cálculo nunca vive en un componente:
 
 ```
 src/
-├── components/
-│   ├── topics/      # Módulos por método numérico (teoría + calculadora + gráficas)
-│   ├── shared/      # Componentes compartidos
-│   └── ui/          # Componentes base de interfaz
-├── pages/           # Páginas de cada método
-├── hooks/           # Hooks personalizados
-├── lib/ y utils/    # Lógica de cálculo y utilidades
-docs/                # Documentación y análisis numérico de los métodos
+├── utils/<metodo>.ts               Algoritmo. Funciones puras, sin React
+├── types/<metodo>.ts               Entradas, resultados, filas de iteración
+├── hooks/use<Metodo>.ts            Validación, ejecución, estado de la interfaz
+├── components/topics/<tema>/       Formulario, tabla, gráficas
+└── pages/<Metodo>Page.tsx          Composición y teoría
 ```
 
-## Convenciones del repositorio
+Alrededor hay tres carpetas compartidas: `components/shared/` con el andamiaje común
+(`MethodModuleLayout`, `TheoryBlock`, `MarginLayout`), `components/ui/` con los primitivos
+de shadcn y `data/` con el catálogo de métodos. Ese catálogo, `data/methods.ts`, es lo que
+alimenta el panel de navegación, las fichas y los avisos de «cuándo falla», así que un
+método nuevo los hereda sin escribir JSX.
 
-Los commits siguen [Conventional Commits](https://www.conventionalcommits.org/es/) en español — ver el skill `git-commit` en [`.claude/skills/`](.claude/skills/).
+En [`docs/`](docs/) está el análisis numérico escrito de cada método, un documento por
+carpeta.
 
-Los skills están duplicados en [`.claude/skills/`](.claude/skills/) y [`.agents/skills/`](.agents/skills/) porque cada herramienta de agentes lee su propia ruta: los dos árboles son idénticos byte a byte y deben seguir así. Si editas uno, replica el cambio en el otro dentro del mismo commit y compruébalo con `diff -r .agents/skills .claude/skills`.
+## Convenciones
 
-Las instrucciones completas para agentes están en [AGENTS.md](AGENTS.md), que [CLAUDE.md](CLAUDE.md) importa para no duplicarlas.
+Los commits siguen [Conventional Commits](https://www.conventionalcommits.org/es/) en
+español. La interfaz, el contenido y el CHANGELOG también van en español, con sus acentos;
+los identificadores del código, en inglés.
 
-## Documentación
+Las instrucciones para agentes están en [AGENTS.md](AGENTS.md), que
+[CLAUDE.md](CLAUDE.md) importa en vez de duplicar. Los skills viven por duplicado en
+[`.claude/skills/`](.claude/skills/) y [`.agents/skills/`](.agents/skills/) porque cada
+herramienta lee su propia ruta. Los dos árboles son idénticos byte a byte y tienen que
+seguir siéndolo: si editas uno, replica el cambio en el otro dentro del mismo commit y
+compruébalo con `diff -r .agents/skills .claude/skills`.
 
-El historial de cambios está en [CHANGELOG.md](CHANGELOG.md) y la documentación teórica de los métodos en la carpeta [`docs/`](docs/).
+El historial de cambios está en [CHANGELOG.md](CHANGELOG.md).
