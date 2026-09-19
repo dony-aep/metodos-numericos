@@ -5,6 +5,7 @@
  */
 import katex from 'katex';
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 
 interface MathProps {
   math: string;
@@ -29,10 +30,15 @@ export function BlockMath({ math, className }: MathProps) {
     }
   }, [math]);
 
+  // El contenedor desplaza en horizontal porque hay formulas que no caben en
+  // un movil, y w-max hace que su ancho sea exactamente el de la formula.
   return (
-    <div 
-      className={className}
-      dangerouslySetInnerHTML={{ __html: html }} 
+    <div
+      className={cn(
+        'max-w-full overflow-x-auto [&>.katex-display]:my-0 [&>.katex-display]:w-max',
+        className
+      )}
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 }
