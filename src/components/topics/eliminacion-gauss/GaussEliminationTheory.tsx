@@ -1,92 +1,97 @@
-import { BlockMath } from '@/components/shared/MathRenderer';
+import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
 
 export function GaussEliminationTheory() {
   return (
     <TheoryStack>
-      {/* Idea general */}
       <TheoryBlock
-        title="Idea general del método"
+        title="La idea"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="A x = b" />
-            </>
-          ) },
+          {
+            label: 'Operación de eliminación',
+            content: (
+              <BlockMath math="\begin{aligned}m_{ik} &= \frac{a_{ik}}{a_{kk}} \\ F_i &\leftarrow F_i - m_{ik}F_k\end{aligned}" />
+            ),
+          },
         ]}
       >
         <p>
-          La eliminación de Gauss transforma un sistema lineal en otro equivalente,
-          pero más simple de resolver:
+          Un sistema triangular se resuelve sin esfuerzo: la última ecuación tiene
+          una sola incógnita, la penúltima dos y ya conoces una, y así hacia arriba.
+          Todo el método consiste en llegar a esa forma.
         </p>
         <p>
-          Primero se aplica <strong>eliminación hacia adelante</strong> para obtener
-          una matriz triangular superior, y luego <strong>sustitución hacia atrás</strong>{' '}
-          para calcular las incógnitas.
-        </p>
-      </TheoryBlock>
-
-      {/* Etapas del algoritmo */}
-      <TheoryBlock
-        title="Etapas del algoritmo"
-        asides={[
-          { content: (
-            <>
-          <BlockMath math="m_{ik} = \\frac{a_{ik}}{a_{kk}}, \\quad F_i \\leftarrow F_i - m_{ik}F_k" />
-            </>
-          ) },
-        ]}
-      >
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { step: '01', label: 'Selección de pivote', desc: 'Elegir el mayor elemento en la columna' },
-            { step: '02', label: 'Eliminación por filas', desc: 'Reducir a ceros bajo el pivote' },
-            { step: '03', label: 'Sustitución hacia atrás', desc: 'Resolver desde la última ecuación' },
-          ].map((item) => (
-            <div key={item.step} className="border-y border-rule py-4">
-              <span className="font-mono text-xs text-muted-foreground">{item.step}</span>
-              <p className="mt-1 font-medium text-sm">{item.label}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </TheoryBlock>
-
-      {/* Pivoteo parcial */}
-      <TheoryBlock
-        title="Pivoteo parcial y estabilidad"
-        asides={[
-          { content: (
-            <>
-          <BlockMath math="|a_{pk}| = \\max_{i\\ge k}|a_{ik}|" />
-            </>
-          ) },
-        ]}
-      >
-        <p>
-          Para evitar divisiones por valores muy pequeños, se usa pivoteo parcial:
-          se intercambia la fila actual con la que tenga el mayor valor absoluto en
-          la columna del pivote.
-        </p>
-        <p>
-          Esta estrategia reduce errores de redondeo y mejora la robustez numérica.
+          Para conseguirlo se restan múltiplos de una fila a las de abajo hasta
+          dejar ceros bajo la diagonal. Restar un múltiplo de una ecuación a otra no
+          cambia la solución, así que el sistema que queda es{' '}
+          <strong>equivalente</strong> al de partida, solo que resoluble de un
+          vistazo.
         </p>
       </TheoryBlock>
 
-      {/* Complejidad */}
+      <TheoryBlock title="Las dos fases">
+        <p>
+          <strong>Eliminación hacia adelante.</strong> Columna por columna se elige
+          un pivote y se anulan todos los elementos que quedan debajo. Al terminar,
+          la matriz es triangular superior.
+        </p>
+        <p>
+          <strong>Sustitución hacia atrás.</strong> Se despeja la última incógnita,
+          se sustituye en la ecuación anterior, se despeja la siguiente, y así hasta
+          arriba.
+        </p>
+        <p>
+          El reparto de trabajo es muy desigual: la eliminación se lleva del orden
+          de <InlineMath math="n^3" /> operaciones y la sustitución solo{' '}
+          <InlineMath math="n^2" />. Por eso, si vas a resolver varios sistemas con
+          la misma matriz, interesa guardar la eliminación ya hecha. Eso es la
+          factorización LU.
+        </p>
+      </TheoryBlock>
+
       <TheoryBlock
-        title="Complejidad y uso práctico"
+        title="El pivoteo no es un detalle"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="\\text{Costo dominante} \\approx O(n^3)" />
-            </>
-          ) },
+          {
+            label: 'Pivoteo parcial',
+            content: <BlockMath math="|a_{pk}| = \max_{i \ge k}|a_{ik}|" />,
+          },
         ]}
       >
         <p>
-          Es un método directo fundamental y base de técnicas como la factorización
-          LU. Se utiliza ampliamente en ingeniería, simulación y ciencia de datos.
+          En cada columna se divide entre el pivote. Si ese pivote es minúsculo, el
+          multiplicador sale enorme y amplifica también el error de redondeo que
+          arrastraba la fila, esparciéndolo por toda la matriz.
+        </p>
+        <p>
+          El <strong>pivoteo parcial</strong> lo evita con algo muy simple: antes de
+          eliminar, intercambia filas para que el pivote sea el mayor en valor
+          absoluto de su columna. Los multiplicadores quedan entonces menores o
+          iguales que uno y el error deja de crecer.
+        </p>
+        <p>
+          No es una mejora opcional. Sin pivoteo la eliminación de Gauss es
+          numéricamente inestable, y hay sistemas pequeños y bien planteados donde
+          devuelve un resultado sin una sola cifra correcta.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock
+        title="Cuánto cuesta"
+        asides={[
+          { label: 'Operaciones', content: <BlockMath math="\approx \tfrac{2}{3}n^3" /> },
+        ]}
+      >
+        <p>
+          El coste crece con el cubo del tamaño, así que duplicar el número de
+          incógnitas multiplica el trabajo por ocho. Un sistema de mil incógnitas
+          son unos 700 millones de operaciones; uno de diez mil, 700 mil millones.
+        </p>
+        <p>
+          Ese muro es la razón de que existan los métodos iterativos. Con matrices
+          grandes y llenas de ceros sale más barato hacer pasadas de coste{' '}
+          <InlineMath math="n^2" /> hasta tener precisión suficiente que completar
+          una eliminación entera.
         </p>
       </TheoryBlock>
     </TheoryStack>

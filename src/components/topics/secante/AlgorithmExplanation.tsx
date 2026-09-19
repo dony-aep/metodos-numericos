@@ -1,377 +1,177 @@
 import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, ArrowRight, Calculator, CheckCircle2, Clock, Lightbulb, Percent, Target, TrendingUp, XCircle, Zap } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-// Fórmulas LaTeX - usar doble backslash que se convierte en uno solo en el bundle
+// Doble barra invertida: en el bundle queda una sola.
 const LATEX = {
-  // Fórmulas básicas
-  fx0:"f(x) = 0",
-  x0:"x_0",
-  x1:"x_1",
-  x:"x",
-  xn1:"x_{n+1}",
-  fpx:"f'(x)",
-  fpxn:"f'(x_n)",
-  n:"n",
-  r:"r",
-  f:"f",
-  
-  // Fórmulas principales del método
-  secantFormula:"x_{n+1} = x_n - f(x_n) \\cdot \\frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}",
-  secantFormulaAlt:"x_{n+1} = \\frac{x_{n-1} \\cdot f(x_n) - x_n \\cdot f(x_{n-1})}{f(x_n) - f(x_{n-1})}",
-  newtonFormula:"x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}",
-  derivApprox:"f'(x_n) \\approx \\frac{f(x_n) - f(x_{n-1})}{x_n - x_{n-1}}",
-  slopeApprox:"\\frac{f(x_n) - f(x_{n-1})}{x_n - x_{n-1}} \\approx f'(x_n)",
-  
-  // Puntos para geometría
-  pointPrev:"(x_{n-1}, f(x_{n-1}))",
-  pointCurr:"(x_n, f(x_n))",
-  
-  // Convergencia
-  goldenRatio:"p = \\varphi = \\frac{1 + \\sqrt{5}}{2} \\approx 1.618",
-  errorFormula:"|e_{n+1}| \\approx C \\cdot |e_n|^{\\varphi}",
-  errorDef:"e_n = x_n - r",
-  phi:"\\varphi",
-  
-  // Criterios de parada
-  tolDiff:"|x_{n+1} - x_n| < \\text{tolerancia}",
-  tolFunc:"|f(x_{n+1})| < \\text{tolerancia}",
-  
-  // Peligros
-  divZero:"f(x_n) = f(x_{n-1})",
-  approxEqual:"f(x_n) \\approx f(x_{n-1})",
-  x0x1:"x_0, x_1",
-  
-  // Ejemplo numérico
-  exampleFunc:"f(x) = x^3 + 2x^2 + 10x - 20",
-  exampleX0:"x_0 = 0",
-  exampleX1:"x_1 = 1",
-  xn:"x_n",
-  diffFormula:"|x_{n+1} - x_n|",
-  result:"x \\approx 1.368808",
+  secante:
+    'x_{n+1} = x_n - f(x_n) \\cdot \\frac{x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}',
+  newton: "x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}",
+  pendiente: "f'(x_n) \\approx \\frac{f(x_n) - f(x_{n-1})}{x_n - x_{n-1}}",
+  orden: 'p = \\varphi = \\frac{1 + \\sqrt{5}}{2} \\approx 1.618',
+  error: '|e_{n+1}| \\approx C\\,|e_n|^{\\varphi}',
+  paradaX: '|x_{n+1} - x_n| < \\varepsilon',
+  paradaF: '|f(x_{n+1})| < \\varepsilon',
 };
+
+const COMPARACION = [
+  { metodo: 'Bisección', orden: '1', evaluaciones: '1', derivada: 'No', garantia: 'Global' },
+  { metodo: 'Secante', orden: '1.618', evaluaciones: '1', derivada: 'No', garantia: 'Local' },
+  { metodo: 'Newton', orden: '2', evaluaciones: '2', derivada: 'Sí', garantia: 'Local' },
+];
 
 export function AlgorithmExplanation() {
   return (
     <TheoryStack>
-      {/* Resumen Ejecutivo */}
       <TheoryBlock
-        title="Resumen"
+        title="De dónde sale la fórmula"
+        asides={[
+          { label: 'Newton-Raphson', content: <BlockMath math={LATEX.newton} /> },
+          {
+            label: 'La derivada, aproximada',
+            content: <BlockMath math={LATEX.pendiente} />,
+          },
+        ]}
       >
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          El <strong className="text-foreground">método de la secante</strong> es una técnica iterativa 
-          para encontrar raíces de funciones reales <InlineMath math={LATEX.fx0} />. Se basa en aproximar 
-          la derivada mediante la pendiente de la <em>recta secante</em> que une dos puntos sucesivos 
-          de la función.
+        <p>
+          La secante no es un método nuevo: es Newton al que le han quitado la
+          derivada. En vez de calcular <InlineMath math="f'(x_n)" /> se estima con
+          la pendiente entre los dos últimos puntos, que es una{' '}
+          <strong>diferencia finita</strong> de manual.
         </p>
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          A partir de dos aproximaciones iniciales <InlineMath math={LATEX.x0} /> y <InlineMath math={LATEX.x1} />, 
-          el método genera una secuencia de valores que converge hacia la raíz de la función.
+        <p>
+          Sustituyendo esa aproximación en la fórmula de Newton sale directamente
+          la de la secante. Geométricamente, donde Newton traza la tangente en un
+          punto, la secante traza la recta que une dos, y ambas se cortan con el
+          eje en el siguiente candidato.
         </p>
       </TheoryBlock>
 
-      {/* Fórmula Principal */}
       <TheoryBlock
-        title="Fórmula del Método"
+        title="La fórmula"
+        asides={[{ label: 'Iteración', content: <BlockMath math={LATEX.secante} /> }]}
       >
-        <div className="bg-muted/30 border border-border rounded-lg p-3 sm:p-6 text-center overflow-x-auto">
-          <BlockMath math={LATEX.secantFormula} />
-        </div>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Forma equivalente (despejando):
+        <p>
+          Hace falta arrancar con dos puntos, <InlineMath math="x_0" /> y{' '}
+          <InlineMath math="x_1" />, no con uno. A cambio, cada paso solo evalúa la
+          función una vez: el valor en el punto anterior ya lo tienes guardado del
+          paso previo.
         </p>
-        <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4 text-center overflow-x-auto">
-          <BlockMath math={LATEX.secantFormulaAlt} />
-        </div>
-      </TheoryBlock>
-
-      {/* Derivación desde Newton-Raphson */}
-      <TheoryBlock
-        title="Derivación desde Newton-Raphson"
-      >
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          La derivación clásica se obtiene aproximando la derivada por <strong className="text-foreground">diferencias finitas</strong>. 
-          Partiendo de la fórmula de Newton-Raphson:
-        </p>
-        <div className="bg-muted/30 border border-border rounded-lg p-3 sm:p-4 text-center overflow-x-auto">
-          <BlockMath math={LATEX.newtonFormula} />
-        </div>
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          Se sustituye la derivada <InlineMath math={LATEX.fpxn} /> por su aproximación mediante diferencias finitas:
-        </p>
-        <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4 text-center overflow-x-auto">
-          <BlockMath math={LATEX.derivApprox} />
-        </div>
-        <div className="flex items-center justify-center gap-2 text-muted-foreground">
-          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="text-xs sm:text-sm font-medium">Esto produce la fórmula de la secante</span>
-        </div>
-      </TheoryBlock>
-
-      {/* Interpretación Geométrica */}
-      <TheoryBlock
-        title="Interpretación Geométrica"
-      >
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          El método de la secante es una <strong className="text-foreground">aproximación del método de Newton-Raphson</strong> 
-          que evita calcular la derivada <InlineMath math={LATEX.fpx} />.
-        </p>
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          En lugar de usar la recta tangente, se utiliza una <strong className="text-foreground">recta secante</strong> que 
-          pasa por los puntos <InlineMath math={LATEX.pointPrev} /> y <InlineMath math={LATEX.pointCurr} />.
-        </p>
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          La intersección de esta secante con el eje <InlineMath math={LATEX.x} /> da el siguiente valor <InlineMath math={LATEX.xn1} />.
-        </p>
-        
-        <div className="bg-muted/30 border border-border p-3 sm:p-4 rounded-lg">
-          <div className="flex items-start gap-2 sm:gap-3">
-            <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-foreground">
-                La pendiente de la secante aproxima la derivada:
-              </p>
-              <div className="mt-2 overflow-x-auto">
-                <BlockMath math={LATEX.slopeApprox} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </TheoryBlock>
-
-      {/* Orden de Convergencia */}
-      <TheoryBlock
-        title="Orden de Convergencia"
-      >
-        <p className="text-muted-foreground text-sm sm:text-base">
-          El método de la secante tiene orden de convergencia{' '}
-          <Badge variant="secondary" className="text-xs">
-            superlineal
-          </Badge>
-          :
-        </p>
-        <div className="bg-muted/30 border border-border p-3 sm:p-4 rounded-lg text-center overflow-x-auto">
-          <BlockMath math={LATEX.goldenRatio} />
-        </div>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Donde <InlineMath math={LATEX.phi} /> es el <strong className="text-foreground">número áureo</strong> (golden ratio).
-        </p>
-        
-        <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4">
-          <p className="text-xs sm:text-sm text-foreground">
-            <strong>Significado:</strong> El error asintótico satisface:
-          </p>
-          <div className="mt-2 text-center overflow-x-auto">
-            <BlockMath math={LATEX.errorFormula} />
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-            donde <InlineMath math={LATEX.errorDef} /> es el error en la iteración <InlineMath math={LATEX.n} /> y <InlineMath math={LATEX.r} /> es la raíz.
-          </p>
-        </div>
-
-        <div className="mt-4 sm:mt-6">
-          <h4 className="text-foreground font-semibold text-xs sm:text-sm mb-2 sm:mb-3 flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Comparación de Métodos
-          </h4>
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <Table className="text-xs sm:text-sm">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-muted-foreground whitespace-nowrap">Método</TableHead>
-                  <TableHead className="text-muted-foreground whitespace-nowrap">Orden</TableHead>
-                  <TableHead className="text-muted-foreground whitespace-nowrap hidden sm:table-cell">Evaluaciones</TableHead>
-                  <TableHead className="text-muted-foreground whitespace-nowrap">Derivada</TableHead>
-                  <TableHead className="text-muted-foreground whitespace-nowrap hidden sm:table-cell">Garantía</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">Bisección</TableCell>
-                  <TableCell>1</TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">1/iter</TableCell>
-                  <TableCell className="text-muted-foreground">No</TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Badge variant="secondary" className="text-[10px]">Garantizada</Badge>
-                  </TableCell>
-                </TableRow>
-                <TableRow className="bg-muted/40">
-                  <TableCell className="font-semibold whitespace-nowrap">Secante</TableCell>
-                  <TableCell className="font-semibold">≈1.618</TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">1/iter</TableCell>
-                  <TableCell className="text-muted-foreground">No</TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Badge variant="outline" className="text-[10px]">Local</Badge>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">Newton</TableCell>
-                  <TableCell>2</TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">f + f'/iter</TableCell>
-                  <TableCell className="text-muted-foreground">Sí</TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <Badge variant="outline" className="text-[10px]">Local</Badge>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </TheoryBlock>
-
-      {/* Criterios de Convergencia */}
-      <TheoryBlock
-        title="Criterios de Convergencia"
-      >
-        <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-          Los criterios de parada típicos son:
-        </p>
-        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-          <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4">
-            <p className="text-xs sm:text-sm font-medium text-foreground mb-2">Por diferencia absoluta:</p>
-            <div className="text-center overflow-x-auto">
-              <BlockMath math={LATEX.tolDiff} />
-            </div>
-          </div>
-          <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4">
-            <p className="text-xs sm:text-sm font-medium text-foreground mb-2">Por valor de la función:</p>
-            <div className="text-center overflow-x-auto">
-              <BlockMath math={LATEX.tolFunc} />
-            </div>
-          </div>
-        </div>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          En la práctica, se supervisan ambas cantidades y se fija un máximo de iteraciones como respaldo.
+        <p>
+          Ese detalle es el que decide la comparación con Newton. No importa solo
+          cuántas iteraciones hagan falta, sino cuánto cuesta cada una.
         </p>
       </TheoryBlock>
 
-      {/* Peligros y Estrategias */}
       <TheoryBlock
-        title="Peligros y Estrategias"
+        title="Orden de convergencia"
+        asides={[
+          { label: 'Orden', content: <BlockMath math={LATEX.orden} /> },
+          { label: 'Error asintótico', content: <BlockMath math={LATEX.error} /> },
+        ]}
       >
-        <div className="space-y-2 sm:space-y-3">
-          <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4">
-            <p className="font-medium text-amber-700 dark:text-amber-400 flex items-center gap-2 text-sm sm:text-base">
-              <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              División por cero
-            </p>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Si <InlineMath math={LATEX.divZero} />, la secante es horizontal y la fórmula se indetermina.
-            </p>
-          </div>
-          <div className="bg-muted/20 border border-border rounded-lg p-3 sm:p-4">
-            <p className="font-medium text-amber-700 dark:text-amber-400 flex items-center gap-2 text-sm sm:text-base">
-              <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              No convergencia
-            </p>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Puede divergir si los puntos iniciales no están cerca de la raíz o si la raíz es múltiple.
-            </p>
-          </div>
-        </div>
-        
-        <div className="border rounded-lg p-3 sm:p-4 mt-3 sm:mt-4">
-          <p className="font-medium text-emerald-800 dark:text-emerald-300 flex items-center gap-2 mb-2 text-sm sm:text-base">
-            <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            Estrategias de mitigación
-          </p>
-          <ul className="text-xs sm:text-sm text-muted-foreground space-y-1 list-disc list-inside">
-            <li>Escoger <InlineMath math={LATEX.x0x1} /> donde <InlineMath math={LATEX.f} /> cambia de signo</li>
-            <li>Combinar con bisección para garantizar convergencia inicial</li>
-            <li>Limitar el número de iteraciones y detectar progreso</li>
-          </ul>
-        </div>
-      </TheoryBlock>
-
-      {/* Ventajas y Desventajas */}
-      <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-        <TheoryBlock
-          title="Ventajas"
-        >
-          <ul className="space-y-2 sm:space-y-3">
-            {[
-              { icon: Calculator, text: 'No requiere calcular derivadas' },
-              { icon: Percent, text: 'Una evaluación de f por iteración' },
-              { icon: Zap, text: 'Más rápido que bisección' },
-              { icon: Target, text: 'Fácil de implementar' },
-              { icon: TrendingUp, text: 'Convergencia superlineal (φ ≈ 1.618)' },
-            ].map((item, i) => (
-              <li key={i} className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300">
-                <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                {item.text}
-              </li>
-            ))}
-          </ul>
-        </TheoryBlock>
-
-        <TheoryBlock
-          title="Desventajas"
-        >
-          <ul className="space-y-2 sm:space-y-3">
-            <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-red-800 dark:text-red-300">
-              <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400 shrink-0" />
-              No garantiza convergencia global
-            </li>
-            <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-red-800 dark:text-red-300">
-              <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400 shrink-0" />
-              Sensible a valores iniciales
-            </li>
-            <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-red-800 dark:text-red-300">
-              <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400 shrink-0" />
-              <span>Falla si <InlineMath math={LATEX.approxEqual} /></span>
-            </li>
-            <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-red-800 dark:text-red-300">
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400 shrink-0" />
-              Más lento que Newton-Raphson
-            </li>
-            <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-red-800 dark:text-red-300">
-              <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400 shrink-0" />
-              Requiere dos estimaciones iniciales
-            </li>
-          </ul>
-        </TheoryBlock>
-      </div>
-
-      {/* Ejemplo Numérico */}
-      <TheoryBlock
-        title="Ejemplo Numérico"
-      >
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Encontrar la raíz de <InlineMath math={LATEX.exampleFunc} /> con{' '}
-          <InlineMath math={LATEX.exampleX0} /> y <InlineMath math={LATEX.exampleX1} />:
+        <p>
+          El orden es el <strong>número áureo</strong>, 1.618. No es una curiosidad
+          buscada: sale de resolver la recurrencia del error, y el exponente que
+          aparece resulta ser la razón dorada.
         </p>
-        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-          <Table className="text-xs sm:text-sm">
+        <p>
+          Está entre la bisección, que es lineal, y Newton, que es cuadrático. Pero
+          como gasta la mitad de evaluaciones que Newton, en tiempo de máquina
+          suele salir ganando.
+        </p>
+
+        <div className="mt-2 overflow-x-auto">
+          <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-muted-foreground">n</TableHead>
-                <TableHead className="text-muted-foreground"><InlineMath math={LATEX.xn} /></TableHead>
-                <TableHead className="text-muted-foreground"><InlineMath math={LATEX.diffFormula} /></TableHead>
+                <TableHead>Método</TableHead>
+                <TableHead className="text-right">Orden</TableHead>
+                <TableHead className="text-right">Evaluaciones</TableHead>
+                <TableHead className="text-right">Derivada</TableHead>
+                <TableHead className="text-right">Convergencia</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[
-                { n: 0, x: '0.000000', diff: '—' },
-                { n: 1, x: '1.000000', diff: '1.000000' },
-                { n: 2, x: '1.538462', diff: '0.538462' },
-                { n: 3, x: '1.350311', diff: '0.188151' },
-                { n: 4, x: '1.367917', diff: '0.017606' },
-                { n: 5, x: '1.368813', diff: '0.000896' },
-                { n: 6, x: '1.368808', diff: '0.000005' },
-              ].map((row, i) => (
-                <TableRow key={i} className={i === 6 ? ' ' : 'hover:bg-muted/30'}>
-                  <TableCell className={i === 6 ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : ''}>{row.n}</TableCell>
-                  <TableCell className={`font-mono ${i === 6 ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : ''}`}>{row.x}</TableCell>
-                  <TableCell className={`font-mono ${i === 6 ? 'text-emerald-700 dark:text-emerald-400 font-semibold' : 'text-muted-foreground'}`}>{row.diff}</TableCell>
+              {COMPARACION.map((fila) => (
+                <TableRow key={fila.metodo}>
+                  <TableCell>{fila.metodo}</TableCell>
+                  <TableCell className="text-right font-mono">{fila.orden}</TableCell>
+                  <TableCell className="text-right font-mono">
+                    {fila.evaluaciones}
+                  </TableCell>
+                  <TableCell className="text-right">{fila.derivada}</TableCell>
+                  <TableCell className="text-right">{fila.garantia}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          La raíz aproximada es <InlineMath math={LATEX.result} /> después de 6 iteraciones.
+      </TheoryBlock>
+
+      <TheoryBlock
+        title="Cuándo parar"
+        asides={[
+          { label: 'Por el paso', content: <BlockMath math={LATEX.paradaX} /> },
+          { label: 'Por el residuo', content: <BlockMath math={LATEX.paradaF} /> },
+        ]}
+      >
+        <p>
+          Hay dos criterios y no miden lo mismo. El primero dice que el método ya
+          casi no se mueve; el segundo, que el valor de la función es casi cero.
+        </p>
+        <p>
+          Cumplir uno no implica cumplir el otro: en una función muy plana el
+          residuo puede ser diminuto lejos de la raíz, y en una muy empinada dos
+          puntos casi iguales pueden dar valores muy distintos. Conviene vigilar
+          los dos y poner un tope de iteraciones como red.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock title="Qué gana y qué pierde">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-foreground">A favor</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Casi la velocidad de Newton sin necesitar la derivada.</li>
+              <li>Una sola evaluación por iteración.</li>
+              <li>Sirve cuando la función solo se conoce por tabla o por medida.</li>
+            </ul>
+          </div>
+          <div>
+            <p className="mb-2 text-foreground">En contra</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Necesita dos puntos de partida.</li>
+              <li>No encierra la raíz, así que puede escaparse.</li>
+              <li>Si los dos valores se parecen mucho, el paso se dispara.</li>
+            </ul>
+          </div>
+        </div>
+        <p className="mt-4">
+          La combinación habitual en una biblioteca seria es arrancar con bisección
+          para acorralar la raíz y rematar con secante, que es justamente lo que
+          hace el método de Brent.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock title="Un ejemplo con el que probarlo">
+        <p>
+          Con <InlineMath math="f(x) = x^3 + 2x^2 + 10x - 20" /> y los puntos{' '}
+          <InlineMath math="x_0 = 0" />, <InlineMath math="x_1 = 1" />, la secante
+          llega a <InlineMath math="x \approx 1.368808" /> en unas cinco
+          iteraciones.
+        </p>
+        <p>
+          Es el ejemplo que trae cargado la calculadora. Cambia los dos puntos de
+          partida y verás que el número de pasos se mueve mucho más de lo que
+          esperarías: la convergencia es local, y arrancar lejos se paga.
         </p>
       </TheoryBlock>
     </TheoryStack>

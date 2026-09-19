@@ -1,83 +1,98 @@
-import { BlockMath } from '@/components/shared/MathRenderer';
+import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
-import { Badge } from '@/components/ui/badge';
 
 export function LinearSystemsTheory() {
   return (
     <TheoryStack>
-      {/* Definición */}
       <TheoryBlock
-        title="Definición y forma matricial"
+        title="Qué se está resolviendo"
+        asides={[
+          { label: 'Forma matricial', content: <BlockMath math="A\mathbf{x} = \mathbf{b}" /> },
+        ]}
       >
         <p>
-          Un sistema de ecuaciones lineales reúne ecuaciones donde las incógnitas
-          aparecen de forma lineal. Su forma compacta es:
+          Un sistema lineal es un montón de ecuaciones donde las incógnitas
+          aparecen multiplicadas por números y nada más: ni cuadrados, ni senos, ni
+          productos entre ellas. Esa restricción es lo que lo hace tratable.
         </p>
-        <div className="border-y border-rule py-4 sm:p-4 text-center overflow-x-auto">
-          <BlockMath math="A\mathbf{x} = \mathbf{b}" />
-        </div>
         <p>
-          Donde <strong className="text-foreground">A</strong> es la matriz de coeficientes,{' '}
-          <strong className="text-foreground">x</strong> el vector de incógnitas y{' '}
-          <strong className="text-foreground">b</strong> el vector de términos independientes.
+          Escribirlo como <InlineMath math="A\mathbf{x} = \mathbf{b}" /> no es
+          taquigrafía. Separa lo que define el problema, la matriz{' '}
+          <InlineMath math="A" />, de lo que se pregunta, el vector{' '}
+          <InlineMath math="\mathbf{b}" />. Si resuelves varios sistemas con la
+          misma matriz y distintos términos independientes, el trabajo caro se hace
+          una vez.
         </p>
       </TheoryBlock>
 
-      {/* Clasificación */}
       <TheoryBlock
-        title="Clasificación de sistemas"
-      >
-        <div className="grid gap-2 sm:grid-cols-3">
-          {[
-            { label: 'Cuadrado', desc: 'm = n', detail: 'Mismo número de ecuaciones e incógnitas' },
-            { label: 'Sobredeterminado', desc: 'm > n', detail: 'Más ecuaciones que incógnitas' },
-            { label: 'Subdeterminado', desc: 'm < n', detail: 'Menos ecuaciones que incógnitas' },
-          ].map((item) => (
-            <div key={item.label} className="border-y border-rule py-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="secondary" className="text-xs font-mono">{item.desc}</Badge>
-              </div>
-              <p className="text-sm font-medium text-foreground">{item.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{item.detail}</p>
-            </div>
-          ))}
-        </div>
-      </TheoryBlock>
-
-      {/* Métodos de solución */}
-      <TheoryBlock
-        title="Métodos de solución"
-      >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border-y border-rule py-4 sm:p-4">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Directos</p>
-            <p className="text-sm text-muted-foreground">
-              Eliminación Gaussiana, factorización LU y factorización QR.
-            </p>
-          </div>
-          <div className="border-y border-rule py-4 sm:p-4">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Iterativos</p>
-            <p className="text-sm text-muted-foreground">
-              Jacobi, Gauss-Seidel, SOR y Gradiente Conjugado. Convergen cuando la
-              matriz es diagonal dominante.
-            </p>
-          </div>
-        </div>
-      </TheoryBlock>
-
-      {/* Mínimos cuadrados */}
-      <TheoryBlock
-        title="Mínimos cuadrados y condicionamiento"
+        title="Cuántas soluciones hay"
+        asides={[
+          {
+            label: 'El determinante decide',
+            content: (
+              <BlockMath math="\det(A) \neq 0 \iff \text{solución única}" />
+            ),
+          },
+        ]}
       >
         <p>
-          Cuando no hay solución exacta, se minimiza el error:
+          Con tantas ecuaciones como incógnitas y determinante no nulo, la solución
+          existe y es única. Si el determinante se anula hay dos casos: o ninguna
+          solución, porque las ecuaciones se contradicen, o infinitas, porque
+          algunas repiten lo que ya decían otras.
         </p>
-        <div className="border-y border-rule py-4 sm:p-4 text-center overflow-x-auto">
-          <BlockMath math={"\\min \\|A\\mathbf{x}-\\mathbf{b}\\|"} />
-        </div>
         <p>
-          El <strong className="text-foreground">número de condición</strong> mide sensibilidad a
-          perturbaciones: matrices mal condicionadas amplifican errores.
+          Con más ecuaciones que incógnitas normalmente no hay solución exacta, y lo
+          que se busca entonces es la que menos se equivoca: eso es el ajuste por
+          mínimos cuadrados. Con menos ecuaciones que incógnitas sobran grados de
+          libertad y hay infinitas.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock title="Dos maneras de atacarlo">
+        <p>
+          Los <strong>métodos directos</strong> llegan a la solución exacta en un
+          número fijo de operaciones, sin aproximar: eliminación de Gauss,
+          factorización LU, factorización QR. Cuestan del orden de{' '}
+          <InlineMath math="n^3" />, lo que con una matriz de mil incógnitas ya se
+          nota y con un millón es imposible.
+        </p>
+        <p>
+          Los <strong>métodos iterativos</strong> parten de una solución tentativa
+          y la refinan: Jacobi, Gauss-Seidel, gradiente conjugado. Cada pasada
+          cuesta <InlineMath math="n^2" /> o menos si la matriz es dispersa, y se
+          para cuando la precisión basta. A cambio solo convergen bajo condiciones,
+          como la dominancia diagonal.
+        </p>
+        <p>
+          La regla práctica: matrices pequeñas y densas, directos; matrices enormes
+          y con muchos ceros, iterativos.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock
+        title="El número de condición"
+        asides={[
+          {
+            label: 'Cuánto se amplifica un error',
+            content: (
+              <BlockMath math="\kappa(A) = \|A\|\,\|A^{-1}\|" />
+            ),
+          },
+        ]}
+      >
+        <p>
+          Hay sistemas que no se pueden resolver bien con ningún método, y conviene
+          saber reconocerlos. Si dos ecuaciones son casi paralelas, las rectas se
+          cortan en un ángulo muy abierto y mover un poco una de ellas desplaza el
+          punto de corte muchísimo.
+        </p>
+        <p>
+          El número de condición mide exactamente eso. Si vale{' '}
+          <InlineMath math="10^6" />, puedes perder seis cifras significativas por
+          el camino aunque el algoritmo sea impecable. No es un defecto del método:
+          es el problema el que está mal planteado.
         </p>
       </TheoryBlock>
     </TheoryStack>

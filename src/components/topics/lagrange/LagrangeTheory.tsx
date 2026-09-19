@@ -1,215 +1,136 @@
 import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
-import { Badge } from '@/components/ui/badge';
 
 export function LagrangeTheory() {
   return (
     <TheoryStack>
-      {/* Concepto */}
       <TheoryBlock
-        title="Idea general"
+        title="Un interruptor por cada nodo"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="P_n(x) = \sum_{k=0}^{n} y_k \, L_k(x)" />
-            </>
-          ) },
-          { content: (
-            <>
-          <BlockMath math="L_k(x) = \prod_{\substack{j=0 \\ j \ne k}}^{n} \frac{x - x_j}{x_k - x_j}" />
-            </>
-          ) },
-          { content: (
-            <>
-          <BlockMath
-            math={`L_k(x_i) = \\begin{cases} 1, & i = k \\\\ 0, & i \\ne k \\end{cases}`}
-          />
-            </>
-          ) },
+          {
+            label: 'Base de Lagrange',
+            content: (
+              <BlockMath math="L_k(x) = \prod_{j \ne k} \frac{x - x_j}{x_k - x_j}" />
+            ),
+          },
+          {
+            label: 'Lo que vale en los nodos',
+            content: (
+              <BlockMath math="L_k(x_i) = \begin{cases}1, & i = k \\ 0, & i \ne k\end{cases}" />
+            ),
+          },
         ]}
       >
         <p>
-          La <strong className="text-foreground">interpolación de Lagrange</strong> construye un
-          polinomio <InlineMath math="P_n(x)" /> de grado ≤ <InlineMath math="n" /> que pasa
-          exactamente por los puntos <InlineMath math="(x_0,y_0), \dots, (x_n,y_n)" />.
+          La construcción es más ingeniosa de lo que parece. Para cada nodo se
+          fabrica un polinomio que vale <strong>uno ahí y cero en todos los demás</strong>.
         </p>
         <p>
-          donde cada <strong className="text-foreground">base de Lagrange</strong>{' '}
-          <InlineMath math="L_k(x)" /> «enciende» el valor <InlineMath math="y_k" /> en su
-          nodo <InlineMath math="x_k" /> y «apaga» a los demás:
+          Conseguirlo es directo: pones en el numerador un factor{' '}
+          <InlineMath math="(x - x_j)" /> por cada nodo que quieres anular, con lo
+          que el producto se hace cero en todos ellos, y divides entre lo que valga
+          eso en <InlineMath math="x_k" /> para que ahí dé uno.
         </p>
       </TheoryBlock>
 
-      {/* Existencia y unicidad */}
+      <TheoryBlock
+        title="Sumarlos ponderados"
+        asides={[
+          {
+            label: 'El polinomio',
+            content: <BlockMath math="P_n(x) = \sum_{k=0}^{n} y_k\,L_k(x)" />,
+          },
+        ]}
+      >
+        <p>
+          Con esas bases, el polinomio interpolante se escribe de un tirón: cada
+          valor <InlineMath math="y_k" /> multiplicado por su interruptor.
+        </p>
+        <p>
+          Al evaluar en <InlineMath math="x_i" />, todos los términos se anulan
+          menos el <InlineMath math="i" />-ésimo, que vale <InlineMath math="y_i" />.
+          El polinomio pasa por los puntos por construcción, sin resolver ningún
+          sistema y sin despejar nada.
+        </p>
+      </TheoryBlock>
+
       <TheoryBlock
         title="Existencia y unicidad"
-      >
-        <p>
-          Si los nodos <InlineMath math="x_0, x_1, \dots, x_n" /> son{' '}
-          <strong className="text-foreground">distintos</strong>, existe un único polinomio de
-          grado ≤ <InlineMath math="n" /> que interpola los datos. No hay ambigüedad: no importa
-          el método (Lagrange, Newton, sistema de Vandermonde), el polinomio resultante es el
-          mismo.
-        </p>
-      </TheoryBlock>
-
-      {/* Forma baricéntrica */}
-      <TheoryBlock
-        title="Forma baricéntrica"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="P_n(x) = \frac{\displaystyle\sum_{j=0}^{n} \frac{w_j}{x - x_j} \, y_j}{\displaystyle\sum_{j=0}^{n} \frac{w_j}{x - x_j}}" />
-            </>
-          ) },
-          { content: (
-            <>
-          <BlockMath math="w_j = \frac{1}{\prod_{\substack{i=0 \\ i \ne j}}^{n} (x_j - x_i)}" />
-            </>
-          ) },
+          {
+            label: 'Determinante de Vandermonde',
+            content: (
+              <BlockMath math="\prod_{i<j}(x_j - x_i) \neq 0" />
+            ),
+          },
         ]}
       >
         <p>
-          Para evaluación numérica estable se usa la{' '}
-          <strong className="text-foreground">forma baricéntrica</strong>, que evita recalcular
-          todos los productos para cada punto:
+          Que la fórmula se escriba ya demuestra que el polinomio{' '}
+          <strong>existe</strong>. Que sea único se ve por otro lado: si hubiera
+          dos, su diferencia sería un polinomio de grado <InlineMath math="n" /> con{' '}
+          <InlineMath math="n+1" /> raíces, y eso solo lo cumple el polinomio cero.
         </p>
-        <p>con pesos:</p>
+        <p>
+          La única condición es que los nodos sean distintos. Si dos coinciden, el
+          determinante de Vandermonde se anula y el problema deja de tener sentido:
+          estarías pidiendo dos valores para la misma abscisa.
+        </p>
       </TheoryBlock>
 
-      {/* Ventajas y desventajas */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TheoryBlock
-          title="Ventajas"
-        >
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Directo
-            </Badge>
-            No requiere resolver un sistema lineal.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Claro
-            </Badge>
-            La forma es muy intuitiva para enseñanza.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Práctico
-            </Badge>
-            Funciona bien para un número pequeño o moderado de puntos.
-          </p>
-        </TheoryBlock>
-
-        <TheoryBlock
-          title="Limitaciones"
-        >
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Runge
-            </Badge>
-            Grados altos con nodos equiespaciados pueden oscilar.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Costoso
-            </Badge>
-            Evaluar repetidamente la fórmula directa es <InlineMath math="O(n^2)" />.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              No incremental
-            </Badge>
-            Agregar un punto nuevo obliga a recalcular todas las bases.
-          </p>
-        </TheoryBlock>
-      </div>
-
-      {/* Error de interpolación */}
       <TheoryBlock
-        title=""
+        title="La forma baricéntrica"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="f(x) - P_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!} \prod_{j=0}^{n}(x - x_j)" />
-            </>
-          ) },
+          {
+            label: 'Pesos, calculados una vez',
+            content: (
+              <BlockMath math="w_k = \frac{1}{\prod_{j \ne k}(x_k - x_j)}" />
+            ),
+          },
+          {
+            label: 'Evaluación',
+            content: (
+              <BlockMath math="P_n(x) = \frac{\sum_k \dfrac{w_k}{x - x_k}\,y_k}{\sum_k \dfrac{w_k}{x - x_k}}" />
+            ),
+          },
         ]}
       >
         <p>
-          El error depende de la derivada de orden <InlineMath math="n+1" />, de la distribución
-          de los nodos y del punto de evaluación. Si los nodos están mal distribuidos, el error
-          puede crecer significativamente.
+          La fórmula clásica cuesta <InlineMath math="n^2" /> operaciones cada vez
+          que evalúas, porque rehace todos los productos. La forma baricéntrica
+          reordena lo mismo: calcula los pesos una sola vez y luego cada evaluación
+          cuesta <InlineMath math="n" />.
+        </p>
+        <p>
+          No es solo más rápida, también es más estable numéricamente. Es la que se
+          usa en la práctica; la clásica se enseña porque explica mejor de dónde
+          sale.
         </p>
       </TheoryBlock>
 
-      {/* Comparación con Newton */}
-      <TheoryBlock
-        title="Lagrange vs. Newton"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/20">
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Aspecto
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Lagrange
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Newton
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-muted-foreground">
-              <tr className="border-b">
-                <td className="px-4 py-2 font-medium text-foreground">Forma</td>
-                <td className="px-4 py-2">Bases <InlineMath math="L_k(x)" /></td>
-                <td className="px-4 py-2">Diferencias divididas</td>
-              </tr>
-              <tr className="border-b">
-                <td className="px-4 py-2 font-medium text-foreground">Agregar puntos</td>
-                <td className="px-4 py-2">Recalcular todo</td>
-                <td className="px-4 py-2">Solo una columna más</td>
-              </tr>
-              <tr className="border-b">
-                <td className="px-4 py-2 font-medium text-foreground">Evaluación</td>
-                <td className="px-4 py-2">
-                  <InlineMath math="O(n^2)" /> directa
-                </td>
-                <td className="px-4 py-2">
-                  <InlineMath math="O(n)" /> con Horner
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-medium text-foreground">Resultado</td>
-                <td className="px-4 py-2" colSpan={2}>
-                  El mismo polinomio único de grado ≤ n
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <TheoryBlock title="Frente a Newton">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-foreground">A favor</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Se escribe directamente, sin tabla previa ni sistema.</li>
+              <li>Es la forma más limpia para demostrar resultados.</li>
+              <li>En versión baricéntrica, la más rápida al evaluar.</li>
+            </ul>
+          </div>
+          <div>
+            <p className="mb-2 text-foreground">En contra</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Un punto nuevo obliga a rehacer todas las bases.</li>
+              <li>La forma clásica cuesta n² por evaluación.</li>
+              <li>Con nodos equiespaciados sufre Runge, como cualquier otra.</li>
+            </ul>
+          </div>
         </div>
+        <p className="mt-4">
+          Las dos formas dan el mismo polinomio y el mismo error. Se elige por cómo
+          llegan los datos: de golpe, Lagrange; poco a poco, Newton.
+        </p>
       </TheoryBlock>
     </TheoryStack>
   );

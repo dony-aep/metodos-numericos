@@ -1,291 +1,180 @@
 import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
-import { Badge } from '@/components/ui/badge';
 
 export function NumericalIntegrationTheory() {
   return (
     <TheoryStack>
-      {/* Concepto */}
       <TheoryBlock
-        title="¿Qué es la integración numérica?"
+        title="Cuando no hay primitiva"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="\int_a^b f(x)\,dx \approx \sum_{i=0}^{n} w_i \, f(x_i)" />
-            </>
-          ) },
+          {
+            label: 'Toda regla tiene esta forma',
+            content: <BlockMath math="\int_a^b f(x)\,dx \approx \sum_{i=0}^{n} w_i\,f(x_i)" />,
+            wide: true,
+          },
         ]}
       >
         <p>
-          La integración numérica (o <strong className="text-foreground">cuadratura</strong>)
-          aproxima el valor de una integral definida cuando la función no tiene
-          primitiva elemental, o cuando solo se dispone de valores tabulados.
+          La mayoría de las funciones no tienen primitiva elemental.{' '}
+          <InlineMath math="e^{-x^2}" /> es el ejemplo clásico, y está en el centro
+          de la estadística. Y aunque exista, puede que solo tengas una tabla de
+          medidas y ninguna fórmula que integrar.
         </p>
         <p>
-          Se construyen áreas simples (trapecios o parábolas) bajo la curva.
-          Las dos reglas fundamentales son la del{' '}
-          <strong className="text-foreground">Trapecio</strong> y la de{' '}
-          <strong className="text-foreground">Simpson</strong>, ambas casos
-          particulares de las fórmulas de Newton-Cotes.
+          Todas las reglas hacen lo mismo: evaluar la función en unos cuantos
+          puntos y sumar con pesos. Lo único que las distingue es dónde se colocan
+          los puntos y cuánto pesa cada uno.
         </p>
       </TheoryBlock>
 
-      {/* Regla del Trapecio */}
       <TheoryBlock
-        title="Regla del Trapecio"
+        title="De dónde salen los pesos"
         asides={[
-          { content: (
-            <>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Fórmula simple
-          </p>
-          <BlockMath math="\int_a^b f(x)\,dx \approx \frac{b-a}{2}\left[f(a) + f(b)\right]" />
-            </>
-          ) },
-          { content: (
-            <>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Compuesta
-          </p>
-          <BlockMath math="\int_a^b f(x)\,dx \approx \frac{h}{2}\left[f(x_0) + 2\sum_{i=1}^{n-1} f(x_i) + f(x_n)\right]" />
-            </>
-          ) },
-          { content: (
-            <>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Error
-          </p>
-          <BlockMath math="E_T = -\frac{(b-a)^3}{12}\,f''(\xi), \quad \xi \in (a,b)" />
-          <p className="mt-1 text-xs">
-            Error global de la versión compuesta:{' '}
-            <InlineMath math="O(h^2)" />. Exacta para funciones lineales.
-          </p>
-            </>
-          ) },
+          {
+            label: 'Trapecio: recta por dos puntos',
+            content: <BlockMath math="\int_a^b f \approx \frac{b-a}{2}\bigl[f(a) + f(b)\bigr]" />,
+            wide: true,
+          },
+          {
+            label: 'Simpson: parábola por tres',
+            content: (
+              <BlockMath math="\int_a^b f \approx \frac{b-a}{6}\left[f(a) + 4f\!\left(\tfrac{a+b}{2}\right) + f(b)\right]" />
+            ),
+            wide: true,
+          },
         ]}
       >
         <p>
-          Aproxima la función por una <strong className="text-foreground">recta</strong>{' '}
-          entre los extremos. El área bajo esa recta es un trapecio:
+          Los coeficientes no son arbitrarios. Sustituyes{' '}
+          <InlineMath math="f" /> por su polinomio interpolante e integras ese, que
+          sí tiene primitiva. Con dos puntos sale una recta y el área es un
+          trapecio; con tres, una parábola y salen los pesos 1, 4, 1.
         </p>
-
         <p>
-          En la <strong className="text-foreground">versión compuesta</strong>,
-          se divide <InlineMath math="[a,b]" /> en <InlineMath math="n" />{' '}
-          subintervalos de ancho <InlineMath math="h = (b-a)/n" />:
+          Integrar y interpolar son el mismo problema, y por eso el error de estas
+          reglas es el error de interpolación integrado.
         </p>
-
       </TheoryBlock>
 
-      {/* Regla de Simpson */}
       <TheoryBlock
-        title="Regla de Simpson 1/3"
+        title="Las versiones compuestas"
         asides={[
-          { content: (
-            <>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Fórmula simple
-          </p>
-          <BlockMath math="\int_a^b f(x)\,dx \approx \frac{b-a}{6}\left[f(a) + 4f\!\left(\frac{a+b}{2}\right) + f(b)\right]" />
-            </>
-          ) , wide: true },
-          { content: (
-            <>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Compuesta
-          </p>
-          <BlockMath math="\int_a^b f(x)\,dx \approx \frac{h}{3}\left[f(x_0) + 4\sum_{\text{impar}} f(x_i) + 2\sum_{\substack{\text{par} \\ i \neq 0,n}} f(x_i) + f(x_n)\right]" />
-            </>
-          ) , wide: true },
-          { content: (
-            <>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Error
-          </p>
-          <BlockMath math="E_S = -\frac{(b-a)^5}{2880}\,f^{(4)}(\xi), \quad \xi \in (a,b)" />
-          <p className="mt-1 text-xs">
-            Error global de la versión compuesta:{' '}
-            <InlineMath math="O(h^4)" />. Exacta para polinomios de grado ≤ 3.
-          </p>
-            </>
-          ) },
+          {
+            label: 'Trapecio compuesto',
+            content: (
+              <BlockMath math="\frac{h}{2}\left[f(x_0) + 2\sum_{i=1}^{n-1} f(x_i) + f(x_n)\right]" />
+            ),
+            wide: true,
+          },
+          {
+            label: 'Simpson compuesto',
+            content: (
+              <BlockMath math="\frac{h}{3}\left[f(x_0) + 4\!\!\sum_{i\ \text{impar}}\!\! f(x_i) + 2\!\!\sum_{i\ \text{par}}\!\! f(x_i) + f(x_n)\right]" />
+            ),
+            wide: true,
+          },
         ]}
       >
         <p>
-          Aproxima la función por una <strong className="text-foreground">parábola</strong>{' '}
-          que pasa por tres puntos equiespaciados:
+          Una sola parábola sobre todo el intervalo aproxima mal. La solución no es
+          subir el grado, que trae el fenómeno de Runge, sino partir{' '}
+          <InlineMath math="[a,b]" /> en trozos pequeños y aplicar la regla simple
+          en cada uno.
         </p>
-
         <p>
-          La <strong className="text-foreground">versión compuesta</strong>{' '}
-          requiere un número <strong className="text-foreground">par</strong>{' '}
-          de subintervalos <InlineMath math="n" />:
+          Al sumarlo todo, los extremos interiores aparecen dos veces y de ahí
+          salen los coeficientes 2 y 4. Simpson necesita un{' '}
+          <InlineMath math="n" /> par porque cada parábola consume dos
+          subintervalos.
         </p>
-
       </TheoryBlock>
 
-      {/* Conexión con interpolación */}
       <TheoryBlock
-        title="Relación con la interpolación"
+        title="El orden, y una sorpresa"
+        asides={[
+          {
+            label: 'Error del trapecio',
+            content: <BlockMath math="E_T = -\frac{(b-a)h^2}{12}f''(\xi)" />,
+          },
+          {
+            label: 'Error de Simpson',
+            content: <BlockMath math="E_S = -\frac{(b-a)h^4}{180}f^{(4)}(\xi)" />,
+          },
+        ]}
       >
         <p>
-          Ambas reglas son casos particulares de las{' '}
-          <strong className="text-foreground">fórmulas de Newton-Cotes</strong>:
+          El trapecio es <InlineMath math="O(h^2)" /> y su error depende de{' '}
+          <InlineMath math="f''" />, la curvatura. Con una función lineal es exacto,
+          porque no hay curvatura que perder.
         </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border-y border-rule py-4">
-            <p className="mb-1 text-xs font-semibold text-foreground">Trapecio</p>
-            <p className="text-xs">
-              Interpola <InlineMath math="f" /> con un polinomio de grado 1
-              (recta) e integra exactamente ese polinomio.
-            </p>
-          </div>
-          <div className="border-y border-rule py-4">
-            <p className="mb-1 text-xs font-semibold text-foreground">Simpson</p>
-            <p className="text-xs">
-              Interpola <InlineMath math="f" /> con un polinomio de grado 2
-              (parábola) e integra exactamente ese polinomio.
-            </p>
-          </div>
-        </div>
+        <p>
+          Simpson es <InlineMath math="O(h^4)" />. Lo curioso es que se construye
+          con una parábola y sale exacto hasta grado <strong>tres</strong>: el error
+          del término cúbico es simétrico respecto del punto medio y se cancela
+          solo. Un grado de regalo.
+        </p>
+        <p>
+          En la práctica la diferencia es grande. Duplicar los puntos divide el
+          error del trapecio por 4 y el de Simpson por 16, con el mismo número de
+          evaluaciones.
+        </p>
       </TheoryBlock>
 
-      {/* Comparación */}
-      <TheoryBlock
-        title="Comparación"
-      >
+      <TheoryBlock title="Cuándo ninguna de las dos sirve">
+        <p>
+          Las dos suponen que la función es suave. Si tiene un pico, una
+          discontinuidad en la derivada o una singularidad en un extremo, el error
+          teórico deja de valer: <InlineMath math="f^{(4)}" /> no está acotada y el{' '}
+          <InlineMath math="O(h^4)" /> es una promesa vacía.
+        </p>
+        <p>
+          Ahí conviene partir el intervalo por el punto problemático, usar
+          cuadratura adaptativa, que refina solo donde el error local es grande, o
+          cambiar de variable para absorber la singularidad.
+        </p>
+        <p>
+          Hay una excepción que compensa: con una función periódica integrada sobre
+          un periodo completo, el humilde trapecio converge más rápido que
+          cualquier potencia de <InlineMath math="h" />.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock title="Cuál elegir">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/20">
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Método
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Aproximación
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Requisito
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Orden
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Exacta para
-                </th>
+          <table className="w-full text-left text-[13px]">
+            <thead className="text-muted-foreground">
+              <tr className="border-b border-rule">
+                <th className="py-2 pr-4 font-normal">Regla</th>
+                <th className="py-2 pr-4 font-normal">Error</th>
+                <th className="py-2 pr-4 font-normal">Exacta hasta</th>
+                <th className="py-2 font-normal">Condición</th>
               </tr>
             </thead>
-            <tbody className="text-muted-foreground">
-              <tr className="border-b">
-                <td className="px-4 py-2 font-medium text-foreground">Trapecio</td>
-                <td className="px-4 py-2">Rectas</td>
-                <td className="px-4 py-2">Ninguno</td>
-                <td className="px-4 py-2"><InlineMath math="O(h^2)" /></td>
-                <td className="px-4 py-2">Polinomios grado ≤ 1</td>
+            <tbody>
+              <tr className="border-b border-rule">
+                <td className="py-2 pr-4 text-foreground">Trapecio</td>
+                <td className="py-2 pr-4">
+                  <InlineMath math="O(h^2)" />
+                </td>
+                <td className="py-2 pr-4">Grado 1</td>
+                <td className="py-2">Cualquier n</td>
               </tr>
               <tr>
-                <td className="px-4 py-2 font-medium text-foreground">Simpson 1/3</td>
-                <td className="px-4 py-2">Parábolas</td>
-                <td className="px-4 py-2">n par</td>
-                <td className="px-4 py-2"><InlineMath math="O(h^4)" /></td>
-                <td className="px-4 py-2">Polinomios grado ≤ 3</td>
+                <td className="py-2 pr-4 text-foreground">Simpson 1/3</td>
+                <td className="py-2 pr-4">
+                  <InlineMath math="O(h^4)" />
+                </td>
+                <td className="py-2 pr-4">Grado 3</td>
+                <td className="py-2">n par</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </TheoryBlock>
-
-      {/* Ventajas y limitaciones */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TheoryBlock
-          title="Ventajas"
-        >
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Simple
-            </Badge>
-            Fáciles de entender e implementar.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Versátil
-            </Badge>
-            Trabajan con funciones o datos tabulados.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Preciso
-            </Badge>
-            Simpson converge rápidamente para funciones suaves.
-          </p>
-        </TheoryBlock>
-
-        <TheoryBlock
-          title="Limitaciones"
-        >
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Curvatura
-            </Badge>
-            Trapecio necesita muchos subintervalos si f es muy curva.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Restricción
-            </Badge>
-            Simpson requiere un número par de subintervalos.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Singularidades
-            </Badge>
-            Fallan si la función tiene discontinuidades en el intervalo.
-          </p>
-        </TheoryBlock>
-      </div>
-
-      {/* Cuándo usar cada uno */}
-      <TheoryBlock
-        title=""
-      >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border-y border-rule py-4">
-            <p className="mb-1 text-xs font-semibold text-foreground">Trapecio</p>
-            <ul className="list-inside list-disc space-y-0.5 text-xs">
-              <li>Cuando se necesita algo simple y rápido</li>
-              <li>Datos tabulados con pocos puntos</li>
-              <li>Primera aproximación gruesa</li>
-              <li>Función casi lineal en el intervalo</li>
-            </ul>
-          </div>
-          <div className="border-y border-rule py-4">
-            <p className="mb-1 text-xs font-semibold text-foreground">Simpson</p>
-            <ul className="list-inside list-disc space-y-0.5 text-xs">
-              <li>Función suave (derivadas continuas)</li>
-              <li>Se requiere mayor precisión</li>
-              <li>Se puede usar n par</li>
-              <li>Balance entre costo y exactitud</li>
-            </ul>
-          </div>
-        </div>
+        <p className="mt-4">
+          Con una función suave, Simpson siempre. El trapecio se queda para datos
+          ruidosos, donde su menor sensibilidad compensa el orden más bajo, y para
+          los casos en que el número de puntos viene dado y es impar.
+        </p>
       </TheoryBlock>
     </TheoryStack>
   );
