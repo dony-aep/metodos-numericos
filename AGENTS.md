@@ -20,7 +20,12 @@ npm run dev       # Vite dev server
 npm run lint      # ESLint, must print nothing
 npm run build     # tsc -b && vite build
 npm run preview   # serve the production build
+npm run icons     # regenerate the icon set from public/favicon.svg
 ```
+
+`npm run icons` derives every raster icon and the social card from `public/favicon.svg`, so
+that file is the only place the mark is drawn. Run it after editing the mark and commit what
+it writes; the outputs are served as static files and are not part of the Vite build.
 
 There are no tests and no test runner. Don't run `npm test` or install Vitest/Jest unless
 asked. A task is done when `npm run lint` and `npm run build` both pass. For UI changes,
@@ -61,10 +66,40 @@ validation, a working calculation, a results table or chart, and a dashboard ent
 
 ## UI conventions
 
-- Build pages from `@/components/ui/*` (Card, Button, Badge, Tabs, Table, Input...). Don't
-  hand-roll a button, card or table out of `div`s when shadcn has one.
-- If a component is missing, add it with `npx shadcn@latest add <component>` before writing a
-  custom one.
+The design language is a notebook page: a margin column on the left naming what sits to its
+right, hairline rules instead of boxes, and a warm monochrome palette. **The interface has no
+accent colour; the charts do.** Colour there separates one series from another, which is
+information. Follow this rather than reaching for cards and pills.
+
+- **Every page is built on `MarginGrid` + `MarginSection`** (`src/components/shared/
+  MarginLayout.tsx`). A section is two grid cells: the label in the margin, the content beside
+  it. Below `lg` the margin collapses and the label moves inline above its content.
+- **A method module is `MethodModuleLayout`**, which takes a `slug` and `resultSections`, a
+  list of `{ label, note?, content }`. The shared vocabulary is «Lectura» for the summary
+  figures, «Traza» for charts and «Tablas» (or «Iteraciones») for tables. A method only
+  declares the sections it actually has.
+- **Chart colour comes from `useChartTheme()`** and nowhere else: `series` for the first
+  series, `neutralSeries` for the second, `palette[n]` beyond that, and `heat` for a
+  continuous magnitude. Axes, grid and text stay grey. Don't write a hex in a chart option.
+- **The fact sheet and the pitfall come from `methods.ts`**, not from each page: `facts`
+  (convergence, cost per step, requirements) and `pitfall` (how the method breaks, with the
+  parameters that reproduce it). `MethodModuleLayout` renders both for every method, so a new
+  method gets them by filling in the data. A page that can load the failing parameters passes
+  `onLoadPitfall` and the button appears.
+- **Theory is written with `TheoryBlock`** (`src/components/shared/TheoryBlock.tsx`), inside a
+  `TheoryStack`. Prose goes in the children at a ~68-character measure; formulas and asides go
+  in the `asides` prop and land in the right margin with a caption. A margin note is 20rem
+  wide, so a long formula has to be stacked with `egin{aligned}` or it will scroll.
+- **Two shared primitives carry the numbers**: `Readout` for the large monospace figures and
+  `ErrorBar` for an error column, whose bar is log-scaled so the convergence reads as a
+  staircase. Use them instead of writing a new summary block.
+- **`Card`, `Badge` and `MethodResultBanner` are already flattened** to rules: no fills, no
+  pills, no shadows. Don't add `rounded-lg border border-border bg-muted/...` boxes back; a
+  block that needs separating gets `border-y border-rule py-4`.
+- `--rule` is the faint line between rows inside a section; `--border` separates sections.
+- Sentence case everywhere. No `uppercase tracking-*` labels, no counters, no numbered markers.
+- Build pages from `@/components/ui/*`. If a component is missing, add it with
+  `npx shadcn@latest add <component>` before writing a custom one.
 - Tailwind classes are for layout, spacing and composition. Behavior comes from the shadcn
   components.
 - Use the `@/*` alias for internal imports and `cn` for conditional classes.
@@ -77,8 +112,11 @@ validation, a working calculation, a results table or chart, and a dashboard ent
   `Navigate`, `useParams`). Only DOM APIs like `RouterProvider` come from
   `react-router/dom`, and none are used today.
 - The secant method charts (`src/components/topics/secante/ConvergencePlot.tsx` and
-  `FunctionPlot.tsx`) hardcode `'Google Sans'` in their ECharts options. Changing the font in
-  `src/index.css` doesn't update them.
+  `FunctionPlot.tsx`) hardcode `'Google Sans'` and `'Google Sans Code'` in their ECharts options.
+  Changing the font in `src/index.css` doesn't update them.
+- Chart colours come from `useChartTheme()` in `src/lib/chartTheme.ts`, not from CSS variables:
+  ECharts can't parse `oklch()`, so the palette lives there in hex and has to be kept in step
+  with `src/index.css` by hand.
 - `MethodPage` is a placeholder for slugs that are registered but not implemented. Never put
   a new method's logic there.
 
