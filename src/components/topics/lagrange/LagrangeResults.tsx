@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
   LineChart as LineChartIcon,
@@ -27,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { LagrangeResult } from '@/types/lagrange';
+import { useChartTheme } from '@/lib/chartTheme';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -37,8 +37,7 @@ function formatNumber(value: number): string {
 }
 
 function LagrangePlot({ result }: { result: LagrangeResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -56,12 +55,10 @@ function LagrangePlot({ result }: { result: LagrangeResult }) {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
         textStyle: {
-          color: isDark ? '#e2e8f0' : '#334155',
+          color: chart.text,
           fontSize: 12,
         },
       },
@@ -71,32 +68,32 @@ function LagrangePlot({ result }: { result: LagrangeResult }) {
       xAxis: {
         type: 'value',
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
       yAxis: {
         type: 'value',
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -108,7 +105,7 @@ function LagrangePlot({ result }: { result: LagrangeResult }) {
           smooth: false,
           showSymbol: false,
           lineStyle: {
-            color: isDark ? '#a1a1aa' : '#71717a',
+            color: chart.series,
             width: 2,
           },
         },
@@ -118,8 +115,8 @@ function LagrangePlot({ result }: { result: LagrangeResult }) {
           data: pointData,
           symbolSize: 10,
           itemStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
-            borderColor: isDark ? '#fafafa' : '#18181b',
+            color: chart.neutralSeries,
+            borderColor: chart.text,
             borderWidth: 2,
           },
         },
@@ -132,8 +129,8 @@ function LagrangePlot({ result }: { result: LagrangeResult }) {
                 symbolSize: 14,
                 symbol: 'diamond',
                 itemStyle: {
-                  color: isDark ? '#34d399' : '#10b981',
-                  borderColor: isDark ? '#6ee7b7' : '#059669',
+                  color: chart.palette[2],
+                  borderColor: chart.palette[2],
                   borderWidth: 2,
                 },
               },
@@ -141,46 +138,45 @@ function LagrangePlot({ result }: { result: LagrangeResult }) {
           : []),
       ],
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <LineChartIcon className="h-4 w-4 text-muted-foreground" />
           Gráfica del polinomio de Lagrange
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 260 : 350 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function LagrangeResults({ result }: { result: LagrangeResult }) {
-  const hasBases = result.bases.length > 0;
-
+export function LagrangeReadout({ result }: { result: LagrangeResult }) {
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Diagnóstico */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Badge
-            className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+            className="text-xs text-emerald-700 dark:text-emerald-300"
             variant="outline"
           >
             Grado {result.n}
@@ -190,7 +186,7 @@ export function LagrangeResults({ result }: { result: LagrangeResult }) {
           </Badge>
           {result.evaluateAt !== null && result.evaluatedValue !== null ? (
             <Badge
-              className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+              className="text-xs text-emerald-700 dark:text-emerald-300"
               variant="outline"
             >
               P({formatNumber(result.evaluateAt)}) ={' '}
@@ -199,140 +195,8 @@ export function LagrangeResults({ result }: { result: LagrangeResult }) {
           ) : null}
         </CardContent>
       </Card>
-
-      {/* Gráfica */}
-      <LagrangePlot result={result} />
-
-      {/* Pesos baricéntricos */}
-      <Card className="border-border bg-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Scale className="h-4 w-4 text-muted-foreground" />
-            Pesos baricéntricos
-            <Badge
-              variant="secondary"
-              className="ml-auto font-mono text-xs"
-            >
-              {result.weights.length} nodos
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
-                    j
-                  </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
-                    x<sub>j</sub>
-                  </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
-                    y<sub>j</sub>
-                  </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
-                    w<sub>j</sub>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {result.points.map((pt, j) => (
-                  <TableRow key={`w-${j}`}>
-                    <TableCell className="font-mono tabular-nums text-muted-foreground">
-                      {j}
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums">
-                      {formatNumber(pt.x)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums">
-                      {formatNumber(pt.y)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums font-medium">
-                      {formatNumber(result.weights[j])}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bases de Lagrange (solo si hubo evaluación) */}
-      {hasBases ? (
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sigma className="h-4 w-4 text-muted-foreground" />
-              Bases de Lagrange en{' '}
-              <InlineMath math={`x = ${formatNumber(result.evaluateAt!)}`} />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/20 hover:bg-muted/20">
-                    <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
-                      k
-                    </TableHead>
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
-                      L<sub>k</sub>(x)
-                    </TableHead>
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
-                      y<sub>k</sub>
-                    </TableHead>
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
-                      y<sub>k</sub> · L<sub>k</sub>(x)
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {result.bases.map((b) => (
-                    <TableRow key={`b-${b.k}`}>
-                      <TableCell className="font-mono tabular-nums text-muted-foreground">
-                        {b.k}
-                      </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
-                        {formatNumber(b.value)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono tabular-nums">
-                        {formatNumber(result.points[b.k].y)}
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          'text-right font-mono tabular-nums font-medium',
-                          Math.abs(b.contribution) > 1e-10
-                            ? ''
-                            : 'text-muted-foreground'
-                        )}
-                      >
-                        {formatNumber(b.contribution)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {/* Total row */}
-                  <TableRow className="border-t-2 bg-muted/10">
-                    <TableCell
-                      colSpan={3}
-                      className="text-right text-xs font-semibold uppercase tracking-wider"
-                    >
-                      Σ
-                    </TableCell>
-                    <TableCell className="text-right font-mono tabular-nums font-bold">
-                      {formatNumber(result.evaluatedValue!)}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-
       {/* Forma explícita del polinomio */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">
             Forma del polinomio de Lagrange
@@ -378,7 +242,7 @@ export function LagrangeResults({ result }: { result: LagrangeResult }) {
               return (
                 <div
                   key={`lk-${k}`}
-                  className="rounded-lg border border-border bg-muted/20 px-3 py-2"
+                  className="border-b border-rule py-2.5"
                 >
                   <p className="mb-1 text-xs text-muted-foreground">
                     <InlineMath math={`L_{${k}}(x)`} />
@@ -392,6 +256,150 @@ export function LagrangeResults({ result }: { result: LagrangeResult }) {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+export function LagrangePlots({ result }: { result: LagrangeResult }) {
+  return (
+    <div>
+      {/* Gráfica */}
+      <LagrangePlot result={result} />
+    </div>
+  );
+}
+
+export function LagrangeTables({ result }: { result: LagrangeResult }) {
+  const hasBases = result.bases.length > 0;
+
+  return (
+    <div className="space-y-10">
+      {/* Pesos baricéntricos */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scale className="h-4 w-4 text-muted-foreground" />
+            Pesos baricéntricos
+            <Badge
+              variant="secondary"
+              className="ml-auto font-mono text-xs"
+            >
+              {result.weights.length} nodos
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    j
+                  </TableHead>
+                  <TableHead className="text-right">
+                    x<sub>j</sub>
+                  </TableHead>
+                  <TableHead className="text-right">
+                    y<sub>j</sub>
+                  </TableHead>
+                  <TableHead className="text-right">
+                    w<sub>j</sub>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {result.points.map((pt, j) => (
+                  <TableRow key={`w-${j}`}>
+                    <TableCell className="font-mono tabular-nums text-muted-foreground">
+                      {j}
+                    </TableCell>
+                    <TableCell className="text-right font-mono tabular-nums">
+                      {formatNumber(pt.x)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono tabular-nums">
+                      {formatNumber(pt.y)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono tabular-nums font-medium">
+                      {formatNumber(result.weights[j])}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+      {/* Bases de Lagrange (solo si hubo evaluación) */}
+      {hasBases ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sigma className="h-4 w-4 text-muted-foreground" />
+              Bases de Lagrange en{' '}
+              <InlineMath math={`x = ${formatNumber(result.evaluateAt!)}`} />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>
+                      k
+                    </TableHead>
+                    <TableHead className="text-right">
+                      L<sub>k</sub>(x)
+                    </TableHead>
+                    <TableHead className="text-right">
+                      y<sub>k</sub>
+                    </TableHead>
+                    <TableHead className="text-right">
+                      y<sub>k</sub> · L<sub>k</sub>(x)
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {result.bases.map((b) => (
+                    <TableRow key={`b-${b.k}`}>
+                      <TableCell className="font-mono tabular-nums text-muted-foreground">
+                        {b.k}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {formatNumber(b.value)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono tabular-nums">
+                        {formatNumber(result.points[b.k].y)}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          'text-right font-mono tabular-nums font-medium',
+                          Math.abs(b.contribution) > 1e-10
+                            ? ''
+                            : 'text-muted-foreground'
+                        )}
+                      >
+                        {formatNumber(b.contribution)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {/* Total row */}
+                  <TableRow className="border-t-2 bg-muted/10">
+                    <TableCell
+                      colSpan={3}
+                      className="text-right"
+                    >
+                      Σ
+                    </TableCell>
+                    <TableCell className="text-right font-mono tabular-nums font-bold">
+                      {formatNumber(result.evaluatedValue!)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

@@ -82,7 +82,7 @@ export function FunctionInput({ value, onChange, error }: FunctionInputProps) {
 
       {/* Panel de ejemplos */}
       {showExamples && (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5 sm:gap-2 p-3 sm:p-4 bg-muted/30 rounded-lg border border-border">
+        <div className="grid grid-cols-2 gap-2 border-y border-rule py-3 lg:grid-cols-3">
           {EXAMPLES.map((example) => (
             <button
               key={example.value}

@@ -1,13 +1,13 @@
 import { useMemo, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import type { SecantIteration } from '@/types/secant';
 import { createMathFunction, generateFunctionPoints } from '@/utils/mathParser';
 import { calculatePlotRange, generateSecantLines } from '@/utils/plotHelpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart as LineChartIcon, Mouse, Hand, SlidersHorizontal, Wrench } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useResponsive';
+import { useChartTheme } from '@/lib/chartTheme';
 
 interface FunctionPlotProps {
   functionExpr: string;
@@ -20,8 +20,7 @@ interface FunctionPlotProps {
 export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: FunctionPlotProps) {
   const chartRef = useRef<ReactECharts>(null);
   const isMobile = useIsMobile();
-  const { resolvedTheme } = useTheme();
-  const isDarkTheme = resolvedTheme === 'dark';
+  const chart = useChartTheme();
 
   // Datos de la gráfica memorizados para mejor rendimiento
   const chartOption = useMemo((): EChartsOption => {
@@ -48,20 +47,20 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
       
       // Series de líneas secantes
       const colors = {
-        tooltipBackground: isDarkTheme ? 'rgba(15, 23, 42, 0.96)' : 'rgba(255, 255, 255, 0.95)',
-        tooltipBorder: isDarkTheme ? '#334155' : '#e2e8f0',
-        tooltipText: isDarkTheme ? '#e2e8f0' : '#334155',
-        mutedText: isDarkTheme ? '#cbd5e1' : '#64748b',
-        axisLine: isDarkTheme ? '#64748b' : '#94a3b8',
-        axisTick: isDarkTheme ? '#475569' : '#cbd5e1',
-        splitLine: isDarkTheme ? '#334155' : '#e2e8f0',
-        secant: isDarkTheme ? '#a1a1aa' : '#71717a',
-        functionLine: isDarkTheme ? '#e4e4e7' : '#3f3f46',
-        iteration: isDarkTheme ? '#d4d4d8' : '#52525b',
-        root: isDarkTheme ? '#22c55e' : '#16a34a',
-        sliderBorder: isDarkTheme ? '#a1a1aa' : '#71717a',
-        sliderFill: isDarkTheme ? 'rgba(161, 161, 170, 0.2)' : 'rgba(113, 113, 122, 0.15)',
-        sliderArea: isDarkTheme ? 'rgba(161, 161, 170, 0.15)' : 'rgba(228, 228, 231, 0.5)',
+        tooltipBackground: chart.tooltipBg,
+        tooltipBorder: chart.grid,
+        tooltipText: chart.text,
+        mutedText: chart.label,
+        axisLine: chart.axis,
+        axisTick: chart.axis,
+        splitLine: chart.grid,
+        secant: chart.label,
+        functionLine: chart.neutralSeries,
+        iteration: chart.label,
+        root: chart.series,
+        sliderBorder: chart.label,
+        sliderFill: chart.isDark ? 'rgba(161, 161, 170, 0.2)' : 'rgba(113, 113, 122, 0.15)',
+        sliderArea: chart.isDark ? 'rgba(161, 161, 170, 0.15)' : 'rgba(228, 228, 231, 0.5)',
       };
 
       const secantSeries = secantLines.map((line, idx) => {
@@ -77,7 +76,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
           name: `Secante ${idx + 1}`,
           data: [[extendedX1, extendedY1], [extendedX2, extendedY2]] as [number, number][],
           lineStyle: {
-            color: `rgba(${isDarkTheme ? '161, 161, 170' : '113, 113, 122'}, ${opacity})`,
+            color: `rgba(${chart.isDark ? '161, 161, 170' : '113, 113, 122'}, ${opacity})`,
             width: 2
           },
           symbol: 'none',
@@ -122,7 +121,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
           borderWidth: 1,
           textStyle: {
             color: colors.tooltipText,
-            fontFamily: 'Google Sans Mono, monospace',
+            fontFamily: 'Google Sans Code, monospace',
             fontSize: 12
           },
           formatter: (params: unknown) => {
@@ -136,7 +135,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
             const y = point.data[1];
             
             return `
-              <div style="font-family: 'Google Sans Mono', monospace;">
+              <div style="font-family: 'Google Sans Code', monospace;">
                 <div style="color: ${colors.mutedText}; margin-bottom: 4px;">x = ${x.toFixed(6)}</div>
                 <div style="color: ${colors.functionLine}; font-weight: 600;">f(x) = ${isNaN(y) ? 'indefinido' : y.toFixed(6)}</div>
               </div>
@@ -175,7 +174,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
           axisLine: { lineStyle: { color: colors.axisLine } },
           axisTick: { lineStyle: { color: colors.axisTick } },
           axisLabel: {
-            fontFamily: 'Google Sans Mono, monospace',
+            fontFamily: 'Google Sans Code, monospace',
             fontSize: 11,
             color: colors.mutedText,
             formatter: (v: number) => v.toFixed(2)
@@ -198,7 +197,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
           axisLine: { lineStyle: { color: colors.axisLine } },
           axisTick: { lineStyle: { color: colors.axisTick } },
           axisLabel: {
-            fontFamily: 'Google Sans Mono, monospace',
+            fontFamily: 'Google Sans Code, monospace',
             fontSize: 11,
             color: colors.mutedText,
             formatter: (v: number) => v.toFixed(2)
@@ -239,7 +238,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
               borderColor: colors.sliderBorder
             },
             textStyle: {
-              fontFamily: 'Google Sans Mono, monospace',
+              fontFamily: 'Google Sans Code, monospace',
               fontSize: 10,
               color: colors.mutedText
             },
@@ -292,7 +291,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
             symbolSize: 10,
             itemStyle: {
               color: colors.iteration,
-              borderColor: '#ffffff',
+              borderColor: chart.surface,
               borderWidth: 2
             },
             z: 20
@@ -307,7 +306,7 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
             symbolSize: 30,
             itemStyle: {
               color: colors.root,
-              borderColor: '#ffffff',
+              borderColor: chart.surface,
               borderWidth: 2
             },
             z: 30
@@ -328,18 +327,18 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
     } catch {
       return {};
     }
-  }, [functionExpr, x0, x1, root, iterations, isDarkTheme, isMobile]);
+  }, [functionExpr, x0, x1, root, iterations, chart, isMobile]);
 
   if (!functionExpr) {
     return (
-      <Card className="border-border">
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             Gráfica de f(x)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent>
           <div className="h-48 sm:h-80 flex items-center justify-center text-muted-foreground text-sm sm:text-base">
             Ingresa una función para ver la gráfica
           </div>
@@ -350,14 +349,14 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
 
   if (Object.keys(chartOption).length === 0) {
     return (
-      <Card className="border-border">
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             Gráfica de f(x)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent>
           <div className="h-48 sm:h-80 flex items-center justify-center text-destructive text-sm sm:text-base">
             Error al generar la gráfica
           </div>
@@ -367,19 +366,19 @@ export function FunctionPlot({ functionExpr, iterations, x0, x1, root }: Functio
   }
 
   return (
-    <Card className="border-border overflow-hidden">
-      <CardHeader className="pb-2 p-4 sm:p-6 sm:pb-2">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+    <Card className="overflow-hidden">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
           <LineChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
           Gráfica de f(x)
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-1 sm:p-2 bg-muted/10">
+      <CardContent>
         <ReactECharts
           ref={chartRef}
           option={chartOption}
           style={{ height: isMobile ? '300px' : '450px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
+          opts={{ renderer: 'svg' }}
           notMerge={true}
         />
         

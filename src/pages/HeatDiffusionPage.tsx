@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { HeatDiffusionHeader } from '@/components/topics/difusion-calor/Header';
-import { HeatDiffusionResults } from '@/components/topics/difusion-calor/HeatDiffusionResults';
+import {
+  HeatDiffusionPlots,
+  HeatDiffusionTables,
+} from '@/components/topics/difusion-calor/HeatDiffusionResults';
 import { HeatDiffusionTheory } from '@/components/topics/difusion-calor/HeatDiffusionTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,17 +156,29 @@ export default function HeatDiffusionPage() {
     });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner
-          variant={result.stable ? 'success' : 'warning'}
-          message={result.message}
-        />
-        <HeatDiffusionResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <MethodResultBanner
+        variant={result.stable ? 'success' : 'warning'}
+        message={result.message}
+      />
+        ),
+      },
+      {
+        label: 'Traza',
+        note: 'El calor se reparte por la barra hasta equilibrarse.',
+        content: <HeatDiffusionPlots result={result} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'El perfil de temperatura al final del cálculo.',
+        content: <HeatDiffusionTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -196,16 +210,8 @@ export default function HeatDiffusionPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <HeatDiffusionHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Difusión del calor (FTCS)',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="difusion-calor"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -242,7 +248,7 @@ export default function HeatDiffusionPage() {
             </div>
 
             {/* Parámetros físicos y de malla */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               {field('Difusividad α', alpha, setAlpha, '1')}
               {field('Longitud L', length, setLength, '1')}
               {field('Tiempo final T', tFinal, setTFinal, '0.1')}
@@ -284,10 +290,9 @@ export default function HeatDiffusionPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<HeatDiffusionTheory />}
       />
-    </div>
   );
 }

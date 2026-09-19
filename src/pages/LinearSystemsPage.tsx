@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { LinearSystemHeader } from '@/components/topics/sistemas-lineales/Header';
 import { LinearSystemInputGrid } from '@/components/topics/sistemas-lineales/LinearSystemInputGrid';
-import { LinearSystemResults } from '@/components/topics/sistemas-lineales/LinearSystemResults';
+import {
+  LinearSystemReadout,
+  LinearSystemTables,
+} from '@/components/topics/sistemas-lineales/LinearSystemResults';
 import { LinearSystemsTheory } from '@/components/topics/sistemas-lineales/LinearSystemsTheory';
 import { Button } from '@/components/ui/button';
 import { useLinearSystem } from '@/hooks/useLinearSystem';
@@ -175,18 +177,27 @@ export default function LinearSystemsPage() {
     </>
   );
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner
-          variant={result.hasUniqueSolution ? 'success' : 'warning'}
-          message={result.message}
-        />
-        <LinearSystemResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner
+        variant={result.hasUniqueSolution ? 'success' : 'warning'}
+        message={result.message}
+      />
+              <LinearSystemReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Tablas',
+        note: 'La solución y el residual que deja al sustituirla.',
+        content: <LinearSystemTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -198,17 +209,8 @@ export default function LinearSystemsPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <LinearSystemHeader />
-
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Sistema Ax = b',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="sistemas-lineales"
         inputSection={
           <div className="space-y-4">
             {inputSection}
@@ -217,10 +219,9 @@ export default function LinearSystemsPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<LinearSystemsTheory />}
       />
-    </div>
   );
 }

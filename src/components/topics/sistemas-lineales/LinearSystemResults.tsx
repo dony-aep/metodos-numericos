@@ -35,18 +35,18 @@ function toClassificationLabel(classification: LinearSystemResult['classificatio
   return 'Subdeterminado';
 }
 
-export function LinearSystemResults({ result }: LinearSystemResultsProps) {
+export function LinearSystemReadout({ result }: LinearSystemResultsProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       {/* Diagnóstico del sistema */}
       <Card>
-        <CardHeader className="p-4 sm:p-6">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
             <Info className="w-4 h-4 text-muted-foreground" />
             Diagnóstico del sistema
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline">{toClassificationLabel(result.classification)}</Badge>
             <Badge variant={result.isSquare ? 'secondary' : 'outline'}>
@@ -56,7 +56,7 @@ export function LinearSystemResults({ result }: LinearSystemResultsProps) {
               variant="outline"
               className={cn(
                 result.isDiagonallyDominant
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
+                  ? '  text-emerald-700   dark:text-emerald-400'
                   : ''
               )}
             >
@@ -67,8 +67,8 @@ export function LinearSystemResults({ result }: LinearSystemResultsProps) {
             <Badge
               className={cn(
                 result.hasUniqueSolution
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
-                  : 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800'
+                  ? ' text-emerald-800 border   dark:text-emerald-400 '
+                  : ' text-amber-800 border   dark:text-amber-400 '
               )}
             >
               {result.hasUniqueSolution
@@ -93,22 +93,28 @@ export function LinearSystemResults({ result }: LinearSystemResultsProps) {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+export function LinearSystemTables({ result }: LinearSystemResultsProps) {
+  return (
+    <div className="space-y-10">
       {/* Vector solución */}
       {result.solution && (
         <Card>
-          <CardHeader className="p-4 sm:p-6">
+          <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               Vector solución
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent>
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Variable</TableHead>
-                  <TableHead className="text-right text-xs font-semibold uppercase tracking-widest text-muted-foreground">Valor</TableHead>
+                <TableRow>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Variable</TableHead>
+                  <TableHead className="text-right text-xs font-medium text-muted-foreground">Valor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -127,21 +133,20 @@ export function LinearSystemResults({ result }: LinearSystemResultsProps) {
           </CardContent>
         </Card>
       )}
-
       {/* Vector residual */}
       {result.residual && (
         <Card>
-          <CardHeader className="p-4 sm:p-6">
+          <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-muted-foreground">
               Residual (Ax − b)
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent>
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Componente</TableHead>
-                  <TableHead className="text-right text-xs font-semibold uppercase tracking-widest text-muted-foreground">Valor</TableHead>
+                <TableRow>
+                  <TableHead className="text-xs font-medium text-muted-foreground">Componente</TableHead>
+                  <TableHead className="text-right text-xs font-medium text-muted-foreground">Valor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

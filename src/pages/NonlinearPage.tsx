@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { NonlinearHeader } from '@/components/topics/ecuaciones-no-lineales/Header';
-import { NonlinearResults } from '@/components/topics/ecuaciones-no-lineales/NonlinearResults';
+import {
+  NonlinearReadout,
+  NonlinearPlots,
+  NonlinearTables,
+} from '@/components/topics/ecuaciones-no-lineales/NonlinearResults';
 import { NonlinearTheory } from '@/components/topics/ecuaciones-no-lineales/NonlinearTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,18 +93,33 @@ export default function NonlinearPage() {
     calculate(inputs);
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!comparison) return undefined;
     const allConverged = comparison.results.every((r) => r.converged);
     const msg = allConverged
       ? 'Todos los métodos convergieron exitosamente.'
       : 'Algunos métodos no convergieron.';
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant={allConverged ? 'success' : 'warning'} message={msg} />
-        <NonlinearResults comparison={comparison} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant={allConverged ? 'success' : 'warning'} message={msg} />
+              <NonlinearReadout comparison={comparison} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'Los tres métodos sobre la misma función.',
+        content: <NonlinearPlots comparison={comparison} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'Iteración a iteración, para comparar la velocidad de cada uno.',
+        content: <NonlinearTables comparison={comparison} />,
+      },
+    ];
   }, [comparison]);
 
   const emptyState =
@@ -113,12 +131,8 @@ export default function NonlinearPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <NonlinearHeader />
-      <MethodModuleLayout
-        labels={{ calculatorTab: 'Calculadora', theoryTab: 'Teoría', inputSectionTitle: 'Ecuaciones No Lineales' }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="ecuaciones-no-lineales"
         inputSection={
           <div className="space-y-4">
             {/* Examples */}
@@ -161,7 +175,7 @@ export default function NonlinearPage() {
             </div>
 
             {/* Parameters */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">a (bisección)</label>
                 <Input value={aStr} onChange={(e) => setAStr(e.target.value)} placeholder="1" className="font-mono" inputMode="decimal" />
@@ -180,7 +194,7 @@ export default function NonlinearPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Tolerancia</label>
                 <Input value={tolStr} onChange={(e) => setTolStr(e.target.value)} placeholder="1e-8" className="font-mono" />
@@ -207,10 +221,9 @@ export default function NonlinearPage() {
             {status === 'error' && error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<NonlinearTheory />}
       />
-    </div>
   );
 }

@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { BarChart3, Eraser, Loader2, Play } from 'lucide-react';
+import { Eraser, Loader2, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
+import { Readout } from '@/components/shared/Readout';
 import { AlgorithmExplanation } from '@/components/topics/secante/AlgorithmExplanation';
 import { ConvergencePlot } from '@/components/topics/secante/ConvergencePlot';
 import { FunctionInput } from '@/components/topics/secante/FunctionInput';
 import { FunctionPlot } from '@/components/topics/secante/FunctionPlot';
-import { Header } from '@/components/topics/secante/Header';
 import { InitialValuesForm } from '@/components/topics/secante/InitialValuesForm';
 import { IterationTable } from '@/components/topics/secante/IterationTable';
 import { Button } from '@/components/ui/button';
@@ -91,57 +91,81 @@ function SecantMethodPage() {
     </>
   );
 
-  const resultsSection = result ? (
-    <div className="space-y-4 sm:space-y-6">
-      <MethodResultBanner
-        variant={result.converged ? 'success' : 'warning'}
-        message={result.message}
-      />
+  const lastIteration = result?.iterations[result.iterations.length - 1];
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 sm:gap-6">
-        <FunctionPlot
-          functionExpr={functionExpr}
-          iterations={result.iterations}
-          x0={parseFloat(x0) || 0}
-          x1={parseFloat(x1) || 1}
-          root={result.root}
-        />
-        <ConvergencePlot iterations={result.iterations} />
-      </div>
-
-      <IterationTable
-        iterations={result.iterations}
-        root={result.root}
-        converged={result.converged}
-      />
-    </div>
-  ) : undefined;
+  const resultSections = result
+    ? [
+        {
+          label: 'Lectura',
+          content: (
+            <div className="space-y-6">
+              <MethodResultBanner
+                variant={result.converged ? 'success' : 'warning'}
+                message={result.message}
+              />
+              <Readout
+                values={[
+                  {
+                    label: 'Raíz aproximada',
+                    value: result.root !== null ? result.root.toFixed(10) : '—',
+                  },
+                  { label: 'Iteraciones', value: String(result.iterations.length) },
+                  {
+                    label: 'Error final',
+                    value: lastIteration
+                      ? lastIteration.error.toExponential(2)
+                      : '—',
+                  },
+                ]}
+              />
+            </div>
+          ),
+        },
+        {
+          label: 'Traza',
+          note: 'La secante entre dos puntos sustituye a la tangente de Newton.',
+          content: (
+            <div className="grid gap-8 xl:grid-cols-2">
+              <FunctionPlot
+                functionExpr={functionExpr}
+                iterations={result.iterations}
+                x0={parseFloat(x0) || 0}
+                x1={parseFloat(x1) || 1}
+                root={result.root}
+              />
+              <ConvergencePlot iterations={result.iterations} />
+            </div>
+          ),
+        },
+        {
+          label: 'Iteraciones',
+          content: (
+            <IterationTable
+              iterations={result.iterations}
+              root={result.root}
+              converged={result.converged}
+            />
+          ),
+        },
+      ]
+    : undefined;
 
   const emptyState =
     !result && status === 'idle' ? (
       <MethodEmptyState
         title="Listo para calcular"
-        description='Ingresa una función y los valores iniciales, luego presiona "Calcular" para encontrar la raíz usando el método de la secante.'
+        description='Ingresa una función y los valores iniciales, luego presiona"Calcular" para encontrar la raíz usando el método de la secante.'
       />
     ) : undefined;
 
   return (
-    <div className="space-y-4">
-      <Header />
-
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Parámetros de Entrada',
-        }}
-        calculatorIcon={<BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />}
+    <MethodModuleLayout
+        slug="secante"
         inputSection={inputSection}
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<AlgorithmExplanation />}
       />
-    </div>
   );
 }
 

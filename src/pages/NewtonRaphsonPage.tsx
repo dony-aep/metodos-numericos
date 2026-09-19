@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { NewtonRaphsonHeader } from '@/components/topics/newton-raphson/Header';
-import { NewtonRaphsonResults } from '@/components/topics/newton-raphson/NewtonRaphsonResults';
+import {
+  NewtonRaphsonPlots,
+  NewtonRaphsonReadout,
+  NewtonRaphsonTable,
+} from '@/components/topics/newton-raphson/NewtonRaphsonResults';
 import { NewtonRaphsonTheory } from '@/components/topics/newton-raphson/NewtonRaphsonTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,6 +46,14 @@ export default function NewtonRaphsonPage() {
     reset();
   };
 
+  const handleLoadPitfall = (example: Record<string, string>) => {
+    setExpression(example.expression);
+    setDerivative(example.derivative);
+    setX0Str(example.x0);
+    setParseError(null);
+    reset();
+  };
+
   const handleCalculate = () => {
     setParseError(null);
     if (!expression.trim()) { setParseError('Ingresa una expresión f(x).'); return; }
@@ -58,14 +69,32 @@ export default function NewtonRaphsonPage() {
     calculate({ expression: expression.trim(), derivative: derivative.trim(), x0, tolerance: tol, maxIterations: maxIter });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant={result.converged ? 'success' : 'warning'} message={result.message} />
-        <NewtonRaphsonResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+          <div className="space-y-6">
+            <MethodResultBanner
+              variant={result.converged ? 'success' : 'warning'}
+              message={result.message}
+            />
+            <NewtonRaphsonReadout result={result} />
+          </div>
+        ),
+      },
+      {
+        label: 'Traza',
+        note: 'Cada iteración sigue la tangente hasta cortar el eje.',
+        content: <NewtonRaphsonPlots result={result} />,
+      },
+      {
+        label: 'Iteraciones',
+        note: 'La barra del error cae en picado: cerca de la raíz, Newton dobla los dígitos correctos en cada paso.',
+        content: <NewtonRaphsonTable result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -77,12 +106,9 @@ export default function NewtonRaphsonPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <NewtonRaphsonHeader />
-      <MethodModuleLayout
-        labels={{ calculatorTab: 'Calculadora', theoryTab: 'Teoría', inputSectionTitle: 'Newton-Raphson' }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        onLoadPitfall={handleLoadPitfall}
+        slug="newton-raphson"
         inputSection={
           <div className="space-y-4">
             {/* Examples */}
@@ -109,7 +135,7 @@ export default function NewtonRaphsonPage() {
             </div>
 
             {/* Parameters */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">x₀ (valor inicial)</label>
                 <Input value={x0Str} onChange={(e) => setX0Str(e.target.value)} placeholder="1" className="font-mono" inputMode="decimal" />
@@ -140,10 +166,9 @@ export default function NewtonRaphsonPage() {
             {status === 'error' && error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<NewtonRaphsonTheory />}
       />
-    </div>
   );
 }

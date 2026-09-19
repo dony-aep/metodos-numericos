@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { EulerHeader } from '@/components/topics/euler/Header';
-import { EulerResults } from '@/components/topics/euler/EulerResults';
+import {
+  EulerReadout,
+  EulerPlots,
+  EulerTables,
+} from '@/components/topics/euler/EulerResults';
 import { EulerTheory } from '@/components/topics/euler/EulerTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +22,7 @@ const EXAMPLE_SETS = [
     h: '0.2',
     steps: '10',
     exact: '(x+1)^2 - 0.5*exp(x)',
-    desc: "y' = y − x² + 1, y(0)=0.5 (Burden & Faires)",
+    desc:"y' = y − x² + 1, y(0)=0.5 (Burden & Faires)",
   },
   {
     label: 'x + y',
@@ -29,7 +32,7 @@ const EXAMPLE_SETS = [
     h: '0.1',
     steps: '10',
     exact: '2*exp(x) - x - 1',
-    desc: "y' = x + y, y(0)=1",
+    desc:"y' = x + y, y(0)=1",
   },
   {
     label: '−2xy',
@@ -39,7 +42,7 @@ const EXAMPLE_SETS = [
     h: '0.1',
     steps: '10',
     exact: 'exp(-x^2)',
-    desc: "y' = −2xy, y(0)=1, exacta: e^{-x²}",
+    desc:"y' = −2xy, y(0)=1, exacta: e^{-x²}",
   },
 ];
 
@@ -73,6 +76,17 @@ export default function EulerPage() {
     setHStr('0.2');
     setStepsStr('10');
     setExactStr('');
+    setParseError(null);
+    reset();
+  };
+
+  const handleLoadPitfall = (example: Record<string, string>) => {
+    setExpression(example.expression);
+    setX0Str(example.x0);
+    setY0Str(example.y0);
+    setHStr(example.h);
+    setStepsStr(example.steps);
+    setExactStr(example.exact);
     setParseError(null);
     reset();
   };
@@ -118,14 +132,29 @@ export default function EulerPage() {
     });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={result.message} />
-        <EulerResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant="success" message={result.message} />
+              <EulerReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'La recta tangente de cada paso, frente a la solución exacta.',
+        content: <EulerPlots result={result} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'Un paso por fila, con el error acumulado.',
+        content: <EulerTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -137,16 +166,9 @@ export default function EulerPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <EulerHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Método de Euler',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        onLoadPitfall={handleLoadPitfall}
+        slug="euler"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -186,7 +208,7 @@ export default function EulerPage() {
             </div>
 
             {/* Condiciones iniciales y parámetros */}
-            <div className="grid gap-4 sm:grid-cols-4">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
                   x₀
@@ -242,8 +264,8 @@ export default function EulerPage() {
             </div>
 
             {/* Selector rápido de pasos */}
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
                 Selección rápida de pasos
               </p>
               <div className="flex flex-wrap gap-2">
@@ -309,10 +331,9 @@ export default function EulerPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<EulerTheory />}
       />
-    </div>
   );
 }

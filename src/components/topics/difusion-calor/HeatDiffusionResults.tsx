@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import { CheckCircle2, Flame, Table2, Waves } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useResponsive';
 import { InlineMath } from '@/components/shared/MathRenderer';
@@ -16,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { HeatDiffusionResult } from '@/types/heat-diffusion';
+import { useChartTheme } from '@/lib/chartTheme';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -33,8 +33,7 @@ function sampleIndices(total: number, max: number): number[] {
 }
 
 function HeatMap({ result }: { result: HeatDiffusionResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -62,9 +61,9 @@ function HeatMap({ result }: { result: HeatDiffusionResult }) {
       backgroundColor: 'transparent',
       tooltip: {
         position: 'top',
-        backgroundColor: isDark ? 'rgba(15,23,42,0.96)' : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDark ? '#e2e8f0' : '#334155', fontSize: 12 },
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
+        textStyle: { color: chart.text, fontSize: 12 },
         formatter: (p: unknown) => {
           const { data: d } = p as { data: [number, number, number | null] };
           const u = d[2];
@@ -73,37 +72,47 @@ function HeatMap({ result }: { result: HeatDiffusionResult }) {
           }`;
         },
       },
+      // La escala de color va al margen derecho en escritorio: abajo se montaba
+      // sobre las etiquetas del eje x.
       grid: isMobile
-        ? { top: 10, right: 12, bottom: 50, left: 48 }
-        : { top: 10, right: 20, bottom: 55, left: 60 },
+        ? { top: 10, right: 12, bottom: 96, left: 48 }
+        : { top: 10, right: 96, bottom: 50, left: 62 },
       xAxis: {
         type: 'category',
         data: xLabels,
         name: 'posición x',
         nameLocation: 'center',
         nameGap: 28,
-        nameTextStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 10 },
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
+        nameTextStyle: { color: chart.label, fontSize: 11 },
+        axisLabel: { color: chart.label, fontSize: 10, hideOverlap: true },
+        axisLine: { lineStyle: { color: chart.axis } },
+        splitLine: { show: false },
       },
       yAxis: {
         type: 'category',
         data: yLabels,
         name: 'tiempo t',
-        nameTextStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 10 },
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
+        nameTextStyle: { color: chart.label, fontSize: 11 },
+        // Con un paso fino hay decenas de instantes: se rotula uno de cada
+        // tantos para que el eje no se convierta en una columna de cifras.
+        axisLabel: {
+          color: chart.label,
+          fontSize: 10,
+          interval: Math.max(0, Math.ceil(yLabels.length / 8) - 1),
+        },
+        axisLine: { lineStyle: { color: chart.axis } },
       },
       visualMap: {
         min,
         max,
         calculable: true,
-        orient: 'horizontal',
-        left: 'center',
-        bottom: 0,
-        textStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 10 },
+        orient: isMobile ? 'horizontal' : 'vertical',
+        ...(isMobile
+          ? { left: 'center' as const, bottom: 0 }
+          : { right: 8, top: 'middle' as const, itemHeight: 160 }),
+        textStyle: { color: chart.label, fontSize: 10 },
         inRange: {
-          color: ['#1e3a8a', '#0ea5e9', '#22c55e', '#facc15', '#f97316', '#dc2626'],
+          color: [...chart.heat],
         },
       },
       series: [
@@ -112,22 +121,22 @@ function HeatMap({ result }: { result: HeatDiffusionResult }) {
           type: 'heatmap',
           data,
           progressive: 2000,
-          emphasis: { itemStyle: { borderColor: isDark ? '#e2e8f0' : '#1e293b', borderWidth: 1 } },
+          emphasis: { itemStyle: { borderColor: chart.text, borderWidth: 1 } },
         },
       ],
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <Flame className="h-4 w-4 text-muted-foreground" />
           Mapa de calor — posición × tiempo
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 320 : 420 }}
@@ -141,15 +150,22 @@ function HeatMap({ result }: { result: HeatDiffusionResult }) {
 }
 
 function ProfilePlot({ result }: { result: HeatDiffusionResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
     const snapshots = sampleIndices(result.times.length, 5);
-    const palette = isDark
-      ? ['#38bdf8', '#34d399', '#fbbf24', '#fb923c', '#f87171']
-      : ['#0369a1', '#059669', '#d97706', '#ea580c', '#dc2626'];
+    // Los cortes en el tiempo van de intenso a pálido, no en tonos sueltos: lo
+    // que cambia entre ellos es una magnitud. El perfil inicial, el más
+    // caliente, es el que más contrasta, y los siguientes se apagan al
+    // aplanarse, en los dos temas.
+    const palette = [
+      chart.heat[5],
+      chart.heat[4],
+      chart.heat[3],
+      chart.heat[2],
+      chart.heat[1],
+    ];
 
     const series: EChartsOption['series'] = snapshots.map((s, idx) => ({
       name: `t = ${result.times[s].toFixed(3)}`,
@@ -166,46 +182,47 @@ function ProfilePlot({ result }: { result: HeatDiffusionResult }) {
       tooltip: { trigger: 'axis' },
       legend: {
         top: 0,
-        textStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 10 },
+        textStyle: { color: chart.label, fontSize: 10 },
       },
       grid: isMobile
-        ? { top: 30, right: 12, bottom: 35, left: 45 }
+        ? { top: 62, right: 12, bottom: 38, left: 45 }
         : { top: 35, right: 20, bottom: 40, left: 55 },
       xAxis: {
         type: 'value',
         name: 'x',
         nameLocation: 'center',
         nameGap: 25,
-        nameTextStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
-        splitLine: { lineStyle: { color: isDark ? '#334155' : '#e2e8f0', type: 'dashed' } },
+        nameTextStyle: { color: chart.label, fontSize: 11 },
+        axisLabel: { color: chart.label, fontSize: 11 },
+        axisLine: { lineStyle: { color: chart.axis } },
+        splitLine: { lineStyle: { color: chart.grid, type: 'dashed' } },
       },
       yAxis: {
         type: 'value',
         name: 'u(x, t)',
-        nameTextStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
-        splitLine: { lineStyle: { color: isDark ? '#334155' : '#e2e8f0', type: 'dashed' } },
+        nameTextStyle: { color: chart.label, fontSize: 11 },
+        axisLabel: { color: chart.label, fontSize: 11 },
+        axisLine: { lineStyle: { color: chart.axis } },
+        splitLine: { lineStyle: { color: chart.grid, type: 'dashed' } },
       },
       series,
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <Waves className="h-4 w-4 text-muted-foreground" />
           Evolución del perfil de temperatura
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 260 : 340 }}
+            opts={{ renderer: 'svg' }}
             notMerge
             lazyUpdate
           />
@@ -215,16 +232,15 @@ function ProfilePlot({ result }: { result: HeatDiffusionResult }) {
   );
 }
 
-export function HeatDiffusionResults({ result }: { result: HeatDiffusionResult }) {
+export function HeatDiffusionPlots({ result }: { result: HeatDiffusionResult }) {
   const { input, dx, lambda, stable } = result;
-  const finalProfile = result.history[result.history.length - 1];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div>
       {/* Resumen */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Parámetros del esquema
           </CardTitle>
@@ -239,26 +255,26 @@ export function HeatDiffusionResults({ result }: { result: HeatDiffusionResult }
             <Badge variant="outline" className="font-mono text-xs">{result.times.length - 1} pasos</Badge>
           </div>
           <div className="grid gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Paso espacial <InlineMath math="\Delta x" />
               </p>
-              <p className="font-mono text-lg font-medium tabular-nums">{formatNumber(dx)}</p>
+              <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">{formatNumber(dx)}</p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Número de difusión <InlineMath math="\lambda" />
               </p>
-              <p className="font-mono text-lg font-medium tabular-nums">{formatNumber(lambda)}</p>
+              <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">{formatNumber(lambda)}</p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Pasos de tiempo
               </p>
-              <p className="font-mono text-lg font-medium tabular-nums">{result.times.length - 1}</p>
+              <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">{result.times.length - 1}</p>
             </div>
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Estabilidad (<InlineMath math="\lambda \le 0.5" />)
               </p>
               <Badge
@@ -274,11 +290,20 @@ export function HeatDiffusionResults({ result }: { result: HeatDiffusionResult }
 
       <HeatMap result={result} />
       <ProfilePlot result={result} />
+    </div>
+  );
+}
 
+export function HeatDiffusionTables({ result }: { result: HeatDiffusionResult }) {
+  const { input } = result;
+  const finalProfile = result.history[result.history.length - 1];
+
+  return (
+    <div className="space-y-10">
       {/* Tabla del perfil final */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Table2 className="h-4 w-4 text-muted-foreground" />
             Perfil final <InlineMath math={`(t = ${input.tFinal})`} />
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -286,16 +311,16 @@ export function HeatDiffusionResults({ result }: { result: HeatDiffusionResult }
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">i</TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>i</TableHead>
+                  <TableHead className="text-right">
                     <InlineMath math="x_i" />
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     <InlineMath math="u_i" />
                   </TableHead>
                 </TableRow>

@@ -1,96 +1,95 @@
-import { BookOpenCheck, Globe, Sigma } from 'lucide-react';
-import { Link, NavLink, Outlet } from 'react-router';
-import { NUMERICAL_METHODS } from '@/data/methods';
-import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { Link, Outlet, useLocation } from 'react-router';
+import { BrandMark } from '@/components/shared/BrandMark';
+import { MethodPanel } from '@/components/shared/MethodPanel';
+import { SiteCredits } from '@/components/shared/SiteCredits';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { cn } from '@/lib/utils';
 
-const availableMethods = NUMERICAL_METHODS.filter(
-  (method) => method.status === 'available'
-).length;
-
 export function AppLayout() {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelPath, setPanelPath] = useState('');
+  const { pathname } = useLocation();
+
+  // Navegar cierra el panel, también con los botones atrás y adelante.
+  if (panelOpen && panelPath !== pathname) {
+    setPanelOpen(false);
+  }
+
+  useEffect(() => {
+    if (!panelOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPanelOpen(false);
+    };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [panelOpen]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-foreground">
-            <Sigma className="h-5 w-5" />
-            <span className="text-sm font-semibold sm:text-base">
-              Métodos Numéricos
-            </span>
-          </Link>
-          <div className="flex items-center gap-2 text-sm">
-            <nav className="flex items-center gap-2 text-sm">
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  cn(
-                    buttonVariants({ variant: isActive ? 'secondary' : 'ghost', size: 'sm' }),
-                    'text-foreground'
-                  )
-                }
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-40 bg-background">
+        {/* El panel se ancla aquí para caer encima del contenido, no empujarlo. */}
+        <div className="relative z-10 border-b border-border bg-background">
+          <div className="mx-auto flex h-14 w-full max-w-[90rem] items-center justify-between px-6 lg:px-10">
+            <Link to="/" className="flex items-center gap-2">
+              <BrandMark />
+              <span className="whitespace-nowrap text-sm font-semibold tracking-tight">
+                Métodos numéricos
+              </span>
+            </Link>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setPanelPath(pathname);
+                  setPanelOpen((open) => !open);
+                }}
+                aria-expanded={panelOpen}
+                className={cn(
+                  'inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm transition-colors',
+                  panelOpen
+                    ? 'bg-muted text-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
               >
-                Dashboard
-              </NavLink>
-            </nav>
-            <ThemeToggle />
+                Métodos
+                <ChevronDown
+                  className={cn(
+                    'h-3.5 w-3.5 transition-transform',
+                    panelOpen && 'rotate-180'
+                  )}
+                />
+              </button>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
+
+        {panelOpen && (
+          <MethodPanel onNavigate={() => setPanelOpen(false)} />
+        )}
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-        <Outlet />
+      {panelOpen && (
+        <button
+          type="button"
+          aria-label="Cerrar el índice"
+          onClick={() => setPanelOpen(false)}
+          className="fixed inset-0 z-30 cursor-default bg-black/40"
+        />
+      )}
+
+      <main className="flex-1">
+        <div className="mx-auto w-full max-w-[90rem]">
+          <Outlet />
+        </div>
       </main>
 
-      <footer className="border-t border-border bg-background">
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            {/* Left: platform info */}
-            <div className="flex flex-col gap-2">
-              <p className="flex items-center gap-2 text-xs font-medium text-foreground sm:text-sm">
-                <BookOpenCheck className="h-4 w-4" />
-                Plataforma de aprendizaje de análisis numérico
-              </p>
-              <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Métodos disponibles:</span>
-                <Badge variant="secondary">
-                  {availableMethods} / {NUMERICAL_METHODS.length}
-                </Badge>
-              </p>
-            </div>
-
-            {/* Right: developer */}
-            <div className="flex items-center gap-3 border-t border-border pt-4 sm:border-t-0 sm:pt-0">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/60">
-                Desarrollado por
-              </span>
-              <div className="h-4 w-px bg-border" />
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://donyaep.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  title="Portafolio"
-                >
-                  <Globe className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
-                  <span className="hidden sm:inline">dony-aep</span>
-                </a>
-                <a
-                  href="https://github.com/dony-aep"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  title="GitHub"
-                >
-                  <svg className="h-3.5 w-3.5 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                  <span className="hidden sm:inline">GitHub</span>
-                </a>
-              </div>
-            </div>
-          </div>
+      <footer className="border-t border-border">
+        <div className="mx-auto w-full max-w-[90rem] px-6 py-5 lg:px-10">
+          <SiteCredits />
         </div>
       </footer>
     </div>

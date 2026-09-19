@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { NumericalIntegrationHeader } from '@/components/topics/integracion-numerica/Header';
-import { NumericalIntegrationResults } from '@/components/topics/integracion-numerica/NumericalIntegrationResults';
+import {
+  NumericalIntegrationReadout,
+  NumericalIntegrationPlots,
+  NumericalIntegrationTables,
+} from '@/components/topics/integracion-numerica/NumericalIntegrationResults';
 import { NumericalIntegrationTheory } from '@/components/topics/integracion-numerica/NumericalIntegrationTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,14 +125,29 @@ export default function NumericalIntegrationPage() {
     calculate({ expression: expression.trim(), a, b, n, exactValue });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={result.message} />
-        <NumericalIntegrationResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant="success" message={result.message} />
+              <NumericalIntegrationReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'El área aproximada por tramos rectos y por parábolas.',
+        content: <NumericalIntegrationPlots result={result} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'Los nodos usados y cómo converge al refinar.',
+        content: <NumericalIntegrationTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -141,16 +159,8 @@ export default function NumericalIntegrationPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <NumericalIntegrationHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Integración Numérica',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="integracion-numerica"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -188,7 +198,7 @@ export default function NumericalIntegrationPage() {
             </div>
 
             {/* Límites y n */}
-            <div className="grid gap-4 sm:grid-cols-4">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
                   Límite a
@@ -245,8 +255,8 @@ export default function NumericalIntegrationPage() {
             </div>
 
             {/* Selector rápido de n */}
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
                 Selección rápida de n
               </p>
               <div className="flex flex-wrap gap-2">
@@ -297,10 +307,9 @@ export default function NumericalIntegrationPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<NumericalIntegrationTheory />}
       />
-    </div>
   );
 }
