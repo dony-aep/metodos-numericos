@@ -1,323 +1,235 @@
-import { Globe2, Cpu, FlaskConical, TrendingUp, Image, TreePine, Thermometer } from 'lucide-react';
 import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
 
 export function HeatDiffusionTheory() {
   return (
     <TheoryStack>
-      {/* EDP y ecuación del calor */}
       <TheoryBlock
-        title="De las EDO a las EDP"
+        title="De una variable a dos"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="\frac{\partial u}{\partial t} = \alpha\,\frac{\partial^2 u}{\partial x^2}" />
-            </>
-          ) },
+          {
+            label: 'Ecuación del calor',
+            content: (
+              <BlockMath math="\frac{\partial u}{\partial t} = \alpha\,\frac{\partial^2 u}{\partial x^2}" />
+            ),
+            wide: true,
+          },
         ]}
       >
         <p>
-          Una <strong className="text-foreground">ecuación en derivadas
-          parciales</strong> (EDP) relaciona una función de varias variables
-          con sus derivadas parciales. La <strong className="text-foreground">ecuación
-          del calor</strong> es el ejemplo clásico de EDP parabólica: describe
-          cómo la temperatura <InlineMath math="u(x,t)" /> se distribuye en el
-          espacio y el tiempo.
+          Hasta aquí la incógnita dependía de una variable. La temperatura de una
+          barra depende de dos, la posición y el tiempo, y eso convierte la
+          ecuación diferencial en una ecuación en derivadas parciales.
         </p>
         <p>
-          donde <InlineMath math="\alpha = k/(\rho\,c_p)" /> es la{' '}
-          <strong className="text-foreground">difusividad térmica</strong>. Se
-          necesita una <strong className="text-foreground">condición inicial</strong>{' '}
-          <InlineMath math="u(x,0)=f(x)" /> y{' '}
-          <strong className="text-foreground">condiciones de frontera</strong>{' '}
-          (aquí Dirichlet: <InlineMath math="u(0,t)=T_a,\ u(L,t)=T_b" />) para
-          tener solución única.
+          Lo que dice es simple: un punto se calienta si está más frío que sus
+          vecinos. La segunda derivada en el espacio mide exactamente esa
+          diferencia, y <InlineMath math="\alpha" /> fija a qué velocidad ocurre.
+        </p>
+        <p>
+          Hace falta además un perfil inicial <InlineMath math="u(x,0)=f(x)" /> y
+          qué pasa en los dos extremos. Aquí son condiciones de Dirichlet, los
+          bordes se mantienen a temperatura fija.
         </p>
       </TheoryBlock>
 
-      {/* Malla y diferencias finitas */}
       <TheoryBlock
-        title="Discretización por diferencias finitas"
+        title="Cambiar las derivadas por diferencias"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="\lambda = \frac{\alpha\,\Delta t}{\Delta x^2}" />
-            </>
-          ) },
+          {
+            label: 'Tiempo, hacia adelante',
+            content: (
+              <BlockMath math="\frac{\partial u}{\partial t} \approx \frac{u_i^{\,n+1}-u_i^{\,n}}{\Delta t}" />
+            ),
+            wide: true,
+          },
+          {
+            label: 'Espacio, centrada',
+            content: (
+              <BlockMath math="\frac{\partial^2 u}{\partial x^2} \approx \frac{u_{i+1}^{\,n}-2u_i^{\,n}+u_{i-1}^{\,n}}{\Delta x^2}" />
+            ),
+            wide: true,
+          },
         ]}
       >
         <p>
-          Se construye una malla <InlineMath math="x_i = i\,\Delta x" /> con{' '}
-          <InlineMath math="\Delta x = L/N" /> y <InlineMath math="t_n = n\,\Delta t" />,
-          con <InlineMath math="u_i^n \approx u(x_i,t_n)" />. Las derivadas se
-          reemplazan por diferencias:
+          Se cubre la barra con una malla,{' '}
+          <InlineMath math="x_i = i\,\Delta x" /> y{' '}
+          <InlineMath math="t_n = n\,\Delta t" />, y se guarda un valor{' '}
+          <InlineMath math="u_i^{\,n}" /> en cada nodo. Las dos derivadas se
+          sustituyen por las fórmulas de diferencias finitas del tema anterior.
         </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border-y border-rule py-4">
-            <p className="mb-2 text-xs text-muted-foreground">
-              Tiempo — adelante <InlineMath math="O(\Delta t)" />
-            </p>
-            <BlockMath math="\frac{\partial u}{\partial t} \approx \frac{u_i^{\,n+1}-u_i^{\,n}}{\Delta t}" />
-          </div>
-          <div className="border-y border-rule py-4">
-            <p className="mb-2 text-xs text-muted-foreground">
-              Espacio — central <InlineMath math="O(\Delta x^2)" />
-            </p>
-            <BlockMath math="\frac{\partial^2 u}{\partial x^2} \approx \frac{u_{i+1}^{\,n}-2u_i^{\,n}+u_{i-1}^{\,n}}{\Delta x^2}" />
-          </div>
-        </div>
         <p>
-          Define el <strong className="text-foreground">número de difusión</strong>:
+          La asimetría es deliberada. En el tiempo basta mirar hacia adelante, que
+          es hacia donde se avanza; en el espacio hay vecinos a los dos lados, así
+          que se usa la centrada y se gana un orden.
         </p>
       </TheoryBlock>
 
-      {/* FTCS */}
       <TheoryBlock
-        title="Método explícito (FTCS)"
+        title="El esquema explícito"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="u_i^{\,n+1} = u_i^{\,n} + \lambda\left(u_{i+1}^{\,n}-2u_i^{\,n}+u_{i-1}^{\,n}\right)" />
-            </>
-          ) },
+          {
+            label: 'Un paso',
+            content: (
+              <BlockMath math="u_i^{\,n+1} = u_i^{\,n} + \lambda\left(u_{i+1}^{\,n}-2u_i^{\,n}+u_{i-1}^{\,n}\right)" />
+            ),
+            wide: true,
+          },
+          {
+            label: 'Número de Fourier',
+            content: <BlockMath math="\lambda = \frac{\alpha\,\Delta t}{\Delta x^2}" />,
+          },
         ]}
       >
         <p>
-          <strong className="text-foreground">FTCS</strong> (Forward-Time,
-          Central-Space) despeja el valor futuro directamente con valores
-          conocidos del paso anterior — sin resolver ningún sistema:
+          Despejando el valor nuevo queda una fórmula directa: cada nodo se calcula
+          a partir de tres nodos del instante anterior, sin resolver nada. La malla
+          entera avanza recorriéndola una vez.
         </p>
         <p>
-          Cada valor nuevo depende de tres puntos del paso anterior. Es muy
-          fácil de programar, pero sólo <strong className="text-foreground">condicionalmente
-          estable</strong>.
+          Todo el comportamiento depende de un único número,{' '}
+          <InlineMath math="\lambda" />, que combina la difusividad con los dos
+          pasos. Es el peso que se da a los vecinos frente al propio nodo.
         </p>
       </TheoryBlock>
 
-      {/* Estabilidad */}
       <TheoryBlock
-        title="Condición de estabilidad"
+        title="La condición que no se puede saltar"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="\lambda = \frac{\alpha\,\Delta t}{\Delta x^2} \le \frac{1}{2}" />
-            </>
-          ) },
+          {
+            label: 'Estabilidad del explícito',
+            content: <BlockMath math="\lambda = \frac{\alpha\,\Delta t}{\Delta x^2} \le \frac{1}{2}" />,
+            wide: true,
+          },
         ]}
       >
         <p>
-          El análisis de von Neumann exige, para el esquema explícito:
+          Con <InlineMath math="\lambda > 1/2" /> el coeficiente del propio nodo,{' '}
+          <InlineMath math="1 - 2\lambda" />, se vuelve negativo: el punto reacciona
+          al revés de como debería. Aparecen oscilaciones de signo alterno que
+          crecen en cada paso hasta que la solución se va al infinito.
         </p>
         <p>
-          Si <InlineMath math="\lambda \le 1/2" /> la solución se suaviza
-          correctamente; si <InlineMath math="\lambda > 1/2" /> aparecen{' '}
-          <strong className="text-foreground">oscilaciones crecientes</strong> y
-          la solución diverge. Reducir <InlineMath math="\Delta x" /> a la mitad
-          obliga a dividir <InlineMath math="\Delta t" /> entre 4, lo que vuelve
-          costoso al método explícito en mallas finas.
+          No es un fallo de precisión que se arregle mirando mejor. El físico es
+          claro: el calor se reparte, nunca se concentra, y el esquema tiene que
+          respetarlo.
+        </p>
+        <p>
+          El coste es alto. Como <InlineMath math="\Delta x" /> está al cuadrado,
+          refinar la malla a la mitad obliga a dividir{' '}
+          <InlineMath math="\Delta t" /> entre cuatro. Diez veces más nodos son cien
+          veces más pasos de tiempo.
         </p>
       </TheoryBlock>
 
-      {/* Comparación de esquemas */}
-      <TheoryBlock
-        title="Comparación de esquemas"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-border text-muted-foreground">
-                <th className="py-2 pr-3 font-semibold">Esquema</th>
-                <th className="py-2 pr-3 font-semibold">Estabilidad</th>
-                <th className="py-2 pr-3 font-semibold">Orden (t)</th>
-                <th className="py-2 font-semibold">¿Resuelve sistema?</th>
+      <TheoryBlock title="Los esquemas implícitos">
+        <p>
+          La alternativa es evaluar la parte espacial en el instante{' '}
+          <strong>nuevo</strong> en vez del viejo. Entonces cada nodo depende de sus
+          vecinos futuros y ya no hay fórmula directa: cada paso de tiempo es un
+          sistema de ecuaciones.
+        </p>
+        <p>
+          El sistema es tridiagonal, porque cada ecuación toca solo tres nodos, y el
+          algoritmo de Thomas lo resuelve en <InlineMath math="O(N)" />. Eso es
+          menos de lo que parece, y a cambio desaparece el límite sobre{' '}
+          <InlineMath math="\Delta t" />.
+        </p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-left text-[13px]">
+            <thead className="text-muted-foreground">
+              <tr className="border-b border-rule">
+                <th className="py-2 pr-4 font-normal">Esquema</th>
+                <th className="py-2 pr-4 font-normal">Estabilidad</th>
+                <th className="py-2 pr-4 font-normal">Orden en t</th>
+                <th className="py-2 font-normal">Coste por paso</th>
               </tr>
             </thead>
-            <tbody className="font-mono">
-              <tr className="border-b border-border/50">
-                <td className="py-2 pr-3">Explícito (FTCS)</td>
-                <td className="py-2 pr-3">Condicional (λ ≤ ½)</td>
-                <td className="py-2 pr-3">O(Δt)</td>
-                <td className="py-2">No</td>
+            <tbody>
+              <tr className="border-b border-rule">
+                <td className="py-2 pr-4 text-foreground">Explícito (FTCS)</td>
+                <td className="py-2 pr-4">Solo si λ ≤ ½</td>
+                <td className="py-2 pr-4">
+                  <InlineMath math="O(\Delta t)" />
+                </td>
+                <td className="py-2">Una pasada</td>
               </tr>
-              <tr className="border-b border-border/50">
-                <td className="py-2 pr-3">Implícito (BTCS)</td>
-                <td className="py-2 pr-3">Incondicional</td>
-                <td className="py-2 pr-3">O(Δt)</td>
-                <td className="py-2">Sí (tridiagonal)</td>
+              <tr className="border-b border-rule">
+                <td className="py-2 pr-4 text-foreground">Implícito (BTCS)</td>
+                <td className="py-2 pr-4">Siempre</td>
+                <td className="py-2 pr-4">
+                  <InlineMath math="O(\Delta t)" />
+                </td>
+                <td className="py-2">Sistema tridiagonal</td>
               </tr>
               <tr>
-                <td className="py-2 pr-3">Crank-Nicolson</td>
-                <td className="py-2 pr-3">Incondicional</td>
-                <td className="py-2 pr-3">O(Δt²)</td>
-                <td className="py-2">Sí (tridiagonal)</td>
+                <td className="py-2 pr-4 text-foreground">Crank-Nicolson</td>
+                <td className="py-2 pr-4">Siempre</td>
+                <td className="py-2 pr-4">
+                  <InlineMath math="O(\Delta t^2)" />
+                </td>
+                <td className="py-2">Sistema tridiagonal</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p>
-          Los esquemas implícitos resuelven en cada paso un sistema{' '}
-          <strong className="text-foreground">tridiagonal</strong> (algoritmo de
-          Thomas), conectando este tema con la eliminación de Gauss y los métodos
-          iterativos del curso.
+        <p className="mt-4">
+          Crank-Nicolson promedia los dos instantes y con eso sube a segundo orden
+          en el tiempo por el mismo coste que el implícito. Es el que se usa por
+          defecto, con la salvedad de que un perfil inicial con un salto brusco le
+          provoca oscilaciones durante los primeros pasos.
         </p>
       </TheoryBlock>
 
-      {/* Aplicaciones — expandidas */}
-      <TheoryBlock
-        title="reparte y suaviza con el tiempo. Aparece en campos muy diversos:"
-      >
-        <div className="grid gap-3 sm:grid-cols-2">
-          {/* Ingeniería térmica */}
-          <div className="border-y border-rule py-4">
-            <div className="mb-1 flex items-center gap-2">
-              <Thermometer className="h-3.5 w-3.5 text-orange-500 dark:text-orange-400" />
-              <p className="text-xs font-semibold text-foreground">Ingeniería térmica</p>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Enfriamiento de motores, diseño de disipadores de calor, hornos
-              industriales y aislamiento térmico de edificios. La difusividad
-              típica de metales es{' '}
-              <InlineMath math="\alpha \approx 10^{-6}\text{–}10^{-5}\,\mathrm{m^2/s}" />{' '}
-              (ej. cobre, acero). Incluye paradas y arranques de turbinas,
-              calderas e intercambiadores donde se diseñan tiempos de
-              enfriamiento seguros.
-            </p>
-          </div>
-
-          {/* Difusión de sustancias */}
-          <div className="border-y border-rule py-4">
-            <div className="mb-1 flex items-center gap-2">
-              <FlaskConical className="h-3.5 w-3.5 text-cyan-500 dark:text-cyan-400" />
-              <p className="text-xs font-semibold text-foreground">Difusión de sustancias</p>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Dispersión de contaminantes en ríos o la atmósfera, tinta
-              disolviéndose en agua, y dopaje de semiconductores. Es la misma
-              EDP con un coeficiente de difusión{' '}
-              <InlineMath math="D" /> en lugar de <InlineMath math="\alpha" />.
-              En medios porosos (suelos, rocas) se usa un{' '}
-              <InlineMath math="\alpha" /> efectivo ajustado a la conductividad
-              del medio.
-            </p>
-          </div>
-
-          {/* Finanzas */}
-          <div className="border-y border-rule py-4">
-            <div className="mb-1 flex items-center gap-2">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
-              <p className="text-xs font-semibold text-foreground">Finanzas — Black-Scholes</p>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              La ecuación de <strong>Black-Scholes</strong> para valorar opciones
-              financieras es matemáticamente equivalente a la ecuación del calor.
-              Con un cambio de variables, el precio de una opción{' '}
-              <InlineMath math="V(S,t)" /> se transforma en un problema de
-              difusión estándar, resuelto con las mismas técnicas numéricas.
-            </p>
-          </div>
-
-          {/* Procesamiento de imágenes */}
-          <div className="border-y border-rule py-4">
-            <div className="mb-1 flex items-center gap-2">
-              <Image className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" />
-              <p className="text-xs font-semibold text-foreground">Procesamiento de imágenes</p>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              El <strong>difuminado gaussiano</strong> (blur) y la reducción de
-              ruido aplican difusión a la intensidad de los píxeles: cada píxel
-              promedia con sus vecinos, suavizando la imagen. Es la base de
-              filtros como el de Perona-Malik (difusión anisotrópica).
-            </p>
-          </div>
-
-          {/* Biología */}
-          <div className="border-y border-rule py-4">
-            <div className="mb-1 flex items-center gap-2">
-              <TreePine className="h-3.5 w-3.5 text-lime-500 dark:text-lime-400" />
-              <p className="text-xs font-semibold text-foreground">Biología y medicina</p>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Difusión de nutrientes y fármacos en tejidos, transporte de
-              oxígeno en capilares, y modelos de propagación de poblaciones
-              (ecuación de reacción-difusión de Fisher). La misma EDP describe
-              cómo las sustancias se distribuyen espacialmente en organismos vivos.
-            </p>
-          </div>
-
-          {/* Geofísica */}
-          <div className="border-y border-rule py-4">
-            <div className="mb-1 flex items-center gap-2">
-              <Globe2 className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
-              <p className="text-xs font-semibold text-foreground">Geofísica</p>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Temperatura del subsuelo y el interior del planeta, flujo de calor
-              en volcanes y zonas geotérmicas. También modela la difusión de
-              calor en suelos y rocas, fundamental para ingeniería geotérmica y
-              estudios climáticos a largo plazo.
-            </p>
-          </div>
-        </div>
+      <TheoryBlock title="La misma ecuación en otros sitios">
+        <p>
+          El nombre es histórico, pero la ecuación describe cualquier magnitud que
+          se reparta y se suavice con el tiempo, y aparece bastante lejos de la
+          termodinámica.
+        </p>
+        <ul className="list-outside list-disc space-y-2 pl-5">
+          <li>
+            <strong>Difusión de sustancias.</strong> Contaminantes en un río, tinta
+            en agua, dopaje de semiconductores. Es idéntica cambiando{' '}
+            <InlineMath math="\alpha" /> por el coeficiente de difusión{' '}
+            <InlineMath math="D" />.
+          </li>
+          <li>
+            <strong>Black-Scholes.</strong> La ecuación que valora opciones
+            financieras se convierte, con un cambio de variables, en la ecuación del
+            calor. Los mismos esquemas resuelven las dos.
+          </li>
+          <li>
+            <strong>Difuminado de imágenes.</strong> Aplicar difusión a la
+            intensidad de los píxeles es el desenfoque gaussiano. La difusión
+            anisotrópica de Perona-Malik hace lo mismo frenando{' '}
+            <InlineMath math="\alpha" /> en los bordes, para suavizar el ruido sin
+            borrar los contornos.
+          </li>
+          <li>
+            <strong>Biología.</strong> Fármacos en un tejido, oxígeno en los
+            capilares, y con un término de reacción añadido, la propagación de
+            poblaciones que describe la ecuación de Fisher.
+          </li>
+        </ul>
       </TheoryBlock>
 
-      {/* Relación con otros temas del curso */}
-      <TheoryBlock
-        title="Relación con otros temas del curso"
-      >
+      <TheoryBlock title="Lo que junta del curso">
         <p>
-          La ecuación del calor <strong className="text-foreground">integra</strong>{' '}
-          varios métodos ya estudiados en el curso de Análisis Numérico:
+          Este tema no introduce casi nada nuevo: monta piezas que ya están
+          construidas. La segunda derivada espacial es la fórmula centrada de{' '}
+          <strong>derivación numérica</strong>. La marcha en el tiempo es{' '}
+          <strong>Euler explícito</strong> aplicado nodo a nodo, con su misma
+          restricción de estabilidad y su mismo orden 1.
         </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex gap-2 border-y border-rule py-4">
-            <Cpu className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <div>
-              <p className="text-xs font-semibold text-foreground">Derivación numérica</p>
-              <p className="text-xs text-muted-foreground">
-                Se usa la <strong>diferencia central</strong> para aproximar{' '}
-                <InlineMath math="\partial^2 u / \partial x^2" />.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 border-y border-rule py-4">
-            <Cpu className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <div>
-              <p className="text-xs font-semibold text-foreground">Método de Euler</p>
-              <p className="text-xs text-muted-foreground">
-                La marcha en el tiempo es <strong>Euler explícito</strong>{' '}
-                aplicado nodo por nodo.
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 border-y border-rule py-4">
-            <Cpu className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <div>
-              <p className="text-xs font-semibold text-foreground">Sistemas lineales</p>
-              <p className="text-xs text-muted-foreground">
-                Los métodos implícito y Crank-Nicolson reducen cada paso a un{' '}
-                <strong>sistema tridiagonal</strong> (eliminación de Gauss /
-                algoritmo de Thomas).
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2 border-y border-rule py-4">
-            <Cpu className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <div>
-              <p className="text-xs font-semibold text-foreground">Jacobi y Gauss-Seidel</p>
-              <p className="text-xs text-muted-foreground">
-                Alternativa iterativa para resolver el sistema tridiagonal en
-                mallas grandes.
-              </p>
-            </div>
-          </div>
-        </div>
         <p>
-          Por esto, la ecuación del calor es un excelente <strong className="text-foreground">
-          tema de cierre</strong> que conecta de forma natural casi todos los
-          métodos del curso.
+          Y los esquemas implícitos acaban en un sistema tridiagonal en cada paso,
+          que es <strong>eliminación de Gauss</strong> con una estructura
+          aprovechada, o bien <strong>Gauss-Seidel</strong>: la matriz sale
+          diagonalmente dominante por construcción, así que converge siempre.
         </p>
       </TheoryBlock>
     </TheoryStack>
   );
 }
-

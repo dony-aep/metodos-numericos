@@ -1,221 +1,161 @@
 import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
-import { Badge } from '@/components/ui/badge';
 
 export function LeastSquaresTheory() {
   return (
     <TheoryStack>
-      {/* Concepto */}
       <TheoryBlock
-        title="¿Qué es el ajuste por mínimos cuadrados?"
+        title="Pasar cerca, no por encima"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="S = \sum_{i=1}^{n} \left(y_i - f(x_i)\right)^2" />
-            </>
-          ) },
+          {
+            label: 'Lo que se minimiza',
+            content: <BlockMath math="S = \sum_{i=1}^{n}\bigl(y_i - f(x_i)\bigr)^2" />,
+          },
         ]}
       >
         <p>
-          El método busca la función <InlineMath math="f(x)" /> que mejor representa un conjunto
-          de datos <InlineMath math="(x_i, y_i)" />,{' '}
-          <strong className="text-foreground">minimizando</strong> la suma de los cuadrados de
-          los residuos:
+          Interpolar exige que la curva pase por todos los puntos. Con datos de
+          laboratorio eso es justo lo que no quieres: cada medida trae ruido, y
+          obligar al polinomio a respetarlo significa ajustar el ruido.
         </p>
         <p>
-          A diferencia de la interpolación, la curva ajustada{' '}
-          <strong className="text-foreground">no pasa</strong> necesariamente por todos los
-          puntos; busca la mejor aproximación global.
+          Aquí se cambia la exigencia por otra. La curva pasa{' '}
+          <strong>cerca</strong> de todos, y «cerca» se define como que la suma de
+          los residuos al cuadrado sea la menor posible.
         </p>
       </TheoryBlock>
 
-      {/* Caso lineal */}
       <TheoryBlock
-        title="Ajuste lineal"
-      >
-        <p>
-          Para el modelo <InlineMath math="y = a + bx" />, al derivar{' '}
-          <InlineMath math="S(a,b)" /> e igualar a cero se obtienen las{' '}
-          <strong className="text-foreground">ecuaciones normales</strong>:
-        </p>
-        <div className="border-y border-rule py-4 space-y-1">
-          <BlockMath math="na + b\sum x_i = \sum y_i" />
-          <BlockMath math="a\sum x_i + b\sum x_i^2 = \sum x_i y_i" />
-        </div>
-        <p>Despejando:</p>
-        <div className="border-y border-rule py-4 space-y-1">
-          <BlockMath math="b = \frac{n\sum x_i y_i - (\sum x_i)(\sum y_i)}{n\sum x_i^2 - (\sum x_i)^2}" />
-          <BlockMath math="a = \frac{\sum y_i - b\sum x_i}{n}" />
-        </div>
-      </TheoryBlock>
-
-      {/* Forma matricial */}
-      <TheoryBlock
-        title="Forma matricial"
+        title="Por qué al cuadrado"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="A^T A \, \mathbf{c} = A^T \mathbf{b}" />
-            </>
-          ) },
-          { content: (
-            <>
-          <BlockMath
-            math={`A = \\begin{bmatrix} 1 & x_1 & x_1^2 & \\cdots & x_1^k \\\\ 1 & x_2 & x_2^2 & \\cdots & x_2^k \\\\ \\vdots & \\vdots & \\vdots & & \\vdots \\\\ 1 & x_n & x_n^2 & \\cdots & x_n^k \\end{bmatrix}`}
-          />
-            </>
-          ) },
+          {
+            label: 'Condición de mínimo',
+            content: (
+              <BlockMath math="\frac{\partial S}{\partial a} = 0,\quad \frac{\partial S}{\partial b} = 0" />
+            ),
+          },
         ]}
       >
         <p>
-          El problema se puede expresar como{' '}
-          <InlineMath math="A\mathbf{c} \approx \mathbf{b}" />, y la solución se obtiene con:
+          Sumar los residuos sin más no sirve: los positivos cancelan a los
+          negativos y una recta pésima puede dar suma cero. El valor absoluto
+          arregla eso, pero no es derivable en el origen y deja el problema sin
+          solución cerrada.
         </p>
         <p>
-          Para un polinomio de grado <InlineMath math="k" />, la matriz de diseño es:
+          El cuadrado cumple las dos cosas: penaliza en las dos direcciones y es
+          derivable en todas partes. Igualar las derivadas a cero convierte el
+          ajuste en un sistema lineal, y ahí se acaba el problema.
         </p>
       </TheoryBlock>
 
-      {/* R² */}
       <TheoryBlock
-        title="Coeficiente de determinación R²"
+        title="Las ecuaciones normales"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="R^2 = 1 - \frac{\sum (y_i - f(x_i))^2}{\sum (y_i - \bar{y})^2}" />
-            </>
-          ) },
+          {
+            label: 'Para la recta y = a + bx',
+            content: (
+              <BlockMath math="\begin{aligned} na + b\textstyle\sum x_i &= \textstyle\sum y_i \ a\textstyle\sum x_i + b\textstyle\sum x_i^2 &= \textstyle\sum x_i y_i \end{aligned}" />
+            ),
+            wide: true,
+          },
+          {
+            label: 'Pendiente',
+            content: (
+              <BlockMath math="b = \frac{n\sum x_i y_i - \sum x_i \sum y_i}{n\sum x_i^2 - \left(\sum x_i\right)^2}" />
+            ),
+            wide: true,
+          },
         ]}
       >
         <p>
-          Un <InlineMath math="R^2" /> cercano a 1 indica un buen ajuste.
-          Valores menores sugieren que el modelo no captura bien la variabilidad de los datos.
+          Derivar e igualar a cero deja dos ecuaciones con dos incógnitas. Todo lo
+          que hace falta para resolverlas son cinco sumas sobre los datos, así que
+          el ajuste se calcula de una pasada.
+        </p>
+        <p>
+          La ordenada sale después: <InlineMath math="a = \bar{y} - b\bar{x}" />.
+          De ahí una propiedad útil, que la recta siempre pasa por el centro de
+          gravedad de la nube.
         </p>
       </TheoryBlock>
 
-      {/* Ventajas y limitaciones */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TheoryBlock
-          title="Ventajas"
-        >
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Simple
-            </Badge>
-            Fácil de entender e implementar.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Flexible
-            </Badge>
-            Se adapta a rectas, polinomios y modelos complejos.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Robusto
-            </Badge>
-            Funciona bien con datos experimentales ruidosos.
-          </p>
-        </TheoryBlock>
-
-        <TheoryBlock
-          title="Limitaciones"
-        >
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Outliers
-            </Badge>
-            Sensible a valores atípicos (errores al cuadrado).
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Sobreajuste
-            </Badge>
-            Grados altos pueden ajustar ruido en vez de tendencia.
-          </p>
-          <p>
-            <Badge
-              variant="outline"
-              className="mr-1 text-[10px]"
-            >
-              Condición
-            </Badge>
-            Las ecuaciones normales pueden ser inestables si la matriz está mal condicionada.
-          </p>
-        </TheoryBlock>
-      </div>
-
-      {/* Tipos de ajuste */}
       <TheoryBlock
-        title=""
+        title="Lineal en los parámetros"
+        asides={[
+          {
+            label: 'Sistema normal',
+            content: <BlockMath math="A^{T}A\,\mathbf{c} = A^{T}\mathbf{b}" />,
+          },
+        ]}
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/20">
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Tipo
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Modelo
-                </th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-muted-foreground">
-                  Nota
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-muted-foreground">
-              <tr className="border-b">
-                <td className="px-4 py-2 font-medium text-foreground">
-                  Lineal
-                </td>
-                <td className="px-4 py-2">
-                  <InlineMath math="a + bx + cx^2 + \cdots" />
-                </td>
-                <td className="px-4 py-2">
-                  Lineal en los parámetros; se resuelve con ecuaciones normales
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="px-4 py-2 font-medium text-foreground">
-                  No lineal
-                </td>
-                <td className="px-4 py-2">
-                  <InlineMath math="ae^{bx}" />
-                </td>
-                <td className="px-4 py-2">
-                  Requiere métodos iterativos (Gauss-Newton, Levenberg-Marquardt)
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-medium text-foreground">
-                  Ponderado
-                </td>
-                <td className="px-4 py-2">
-                  <InlineMath math="\sum w_i e_i^2" />
-                </td>
-                <td className="px-4 py-2">
-                  Cada dato tiene un peso diferente
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <p>
+          «Lineal» no se refiere a la forma de la curva sino a cómo entran los
+          coeficientes. Una parábola, un polinomio de grado ocho o una suma de
+          senos se ajustan con el mismo sistema: basta cambiar las columnas de la
+          matriz de diseño.
+        </p>
+        <p>
+          Lo que sí queda fuera es <InlineMath math="ae^{bx}" />, porque{' '}
+          <InlineMath math="b" /> está en el exponente. Se puede linealizar tomando
+          logaritmos, aunque eso deforma los pesos de los datos, o resolver el
+          problema no lineal con Gauss-Newton.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock
+        title="Qué mide R² y qué no"
+        asides={[
+          {
+            label: 'Coeficiente de determinación',
+            content: (
+              <BlockMath math="R^2 = 1 - \frac{\sum (y_i - f(x_i))^2}{\sum (y_i - \bar{y})^2}" />
+            ),
+            wide: true,
+          },
+        ]}
+      >
+        <p>
+          Compara el error del modelo con el de la respuesta más simple posible,
+          predecir siempre la media. Un <InlineMath math="R^2" /> de 0,95 dice que
+          el ajuste explica el 95 % de la variabilidad que había.
+        </p>
+        <p>
+          Lo que no dice es si el modelo es el adecuado. Subir el grado siempre
+          sube el <InlineMath math="R^2" />, y con grado{' '}
+          <InlineMath math="n-1" /> llega a 1 exacto porque ya está interpolando.
+          Para decidir el grado hay que mirar también los residuos: si conservan un
+          patrón, falta estructura; si parecen ruido, ya está.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock title="Dónde se rompe">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-foreground">A favor</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Solución directa, sin iterar ni adivinar un punto inicial.</li>
+              <li>Vale para cualquier modelo lineal en los coeficientes.</li>
+              <li>Filtra el ruido en vez de reproducirlo.</li>
+            </ul>
+          </div>
+          <div>
+            <p className="mb-2 text-foreground">En contra</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Un solo dato atípico arrastra toda la curva.</li>
+              <li>Grado alto vuelve a ajustar ruido.</li>
+              <li>
+                <InlineMath math="A^{T}A" /> multiplica el número de condición.
+              </li>
+            </ul>
+          </div>
         </div>
+        <p className="mt-4">
+          El último punto es el que sorprende: resolver por ecuaciones normales
+          pierde el doble de cifras que trabajar con la matriz original. Por eso en
+          producción se factoriza <InlineMath math="A" /> con QR y nunca se forma{' '}
+          <InlineMath math="A^{T}A" />.
+        </p>
       </TheoryBlock>
     </TheoryStack>
   );

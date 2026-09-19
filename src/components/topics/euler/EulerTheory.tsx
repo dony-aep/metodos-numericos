@@ -1,214 +1,146 @@
 import { InlineMath, BlockMath } from '@/components/shared/MathRenderer';
 import { TheoryBlock, TheoryStack } from '@/components/shared/TheoryBlock';
-import { Badge } from '@/components/ui/badge';
 
 export function EulerTheory() {
   return (
     <TheoryStack>
-      {/* EDO y PVI */}
       <TheoryBlock
-        title="Ecuaciones diferenciales ordinarias"
+        title="El problema de valor inicial"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="y' = f(x, y)" />
-            </>
-          ) },
-          { content: (
-            <>
-          <BlockMath math="\begin{cases} y' = f(x, y) \\ y(x_0) = y_0 \end{cases}" />
-            </>
-          ) },
+          {
+            label: 'Lo que se da',
+            content: (
+              <BlockMath math="\begin{cases} y' = f(x, y) \\ y(x_0) = y_0 \end{cases}" />
+            ),
+          },
         ]}
       >
         <p>
-          Una <strong className="text-foreground">ecuación diferencial
-          ordinaria</strong> (EDO) de primer orden relaciona una función
-          desconocida <InlineMath math="y(x)" /> con su derivada:
+          Una ecuación diferencial no dice cuánto vale{' '}
+          <InlineMath math="y" />, dice cómo cambia. Eso deja infinitas soluciones,
+          una por cada punto de partida, y la condición inicial elige una.
         </p>
         <p>
-          Un <strong className="text-foreground">problema de valor
-          inicial</strong> (PVI) agrega la condición{' '}
-          <InlineMath math="y(x_0) = y_0" />, lo que permite determinar
-          una solución única bajo condiciones de Lipschitz.
-        </p>
-        <p>
-          Cuando la solución analítica no es viable, los{' '}
-          <strong className="text-foreground">métodos numéricos</strong>{' '}
-          producen una sucesión de aproximaciones{' '}
-          <InlineMath math="y_1, y_2, \ldots, y_N" /> en puntos discretos.
+          Lo importante es que <InlineMath math="f(x,y)" /> da la pendiente en
+          cualquier punto del plano, aunque no sepas qué curva pasa por ahí. Toda la
+          integración numérica de EDO explota eso: no hace falta conocer la
+          solución para saber hacia dónde va.
         </p>
       </TheoryBlock>
 
-      {/* Derivación de Euler */}
       <TheoryBlock
-        title="Derivación del método de Euler"
+        title="Seguir la tangente"
         asides={[
-          { content: (
-            <>
-          <BlockMath math="y(x_{n+1}) = y(x_n) + h\,y'(x_n) + \frac{h^2}{2}\,y''(\xi_n)" />
-            </>
-          ) },
-          { content: (
-            <>
-          <BlockMath math="y_{n+1} = y_n + h \cdot f(x_n,\, y_n)" />
-            </>
-          ) },
+          {
+            label: 'El método',
+            content: <BlockMath math="y_{n+1} = y_n + h\,f(x_n, y_n)" />,
+          },
+          {
+            label: 'Lo que se descarta',
+            content: (
+              <BlockMath math="y(x_{n+1}) = y(x_n) + h\,y'(x_n) + \tfrac{h^2}{2}y''(\xi)" />
+            ),
+            wide: true,
+          },
         ]}
       >
         <p>
-          El método se obtiene truncando la expansión de Taylor de{' '}
-          <InlineMath math="y(x)" /> alrededor de <InlineMath math="x_n" />:
+          Estás en un punto y conoces la pendiente. Avanza en línea recta un tramo{' '}
+          <InlineMath math="h" />, recalcula la pendiente donde hayas caído y repite.
+          Eso es todo el método.
         </p>
         <p>
-          Descartando el término de orden <InlineMath math="O(h^2)" /> y
-          sustituyendo <InlineMath math="y'(x_n) = f(x_n, y_n)" /> se
-          obtiene la <strong className="text-foreground">fórmula de
-          Euler</strong>:
-        </p>
-        <p>
-          Geométricamente, cada paso sigue la{' '}
-          <strong className="text-foreground">recta tangente</strong> a
-          la curva solución en <InlineMath math="(x_n, y_n)" /> durante
-          un intervalo <InlineMath math="h" />.
+          Formalmente es Taylor cortado en el primer término. Lo que se tira es{' '}
+          <InlineMath math="\tfrac{h^2}{2}y''" />, y ese es el error de cada paso.
         </p>
       </TheoryBlock>
 
-      {/* Algoritmo paso a paso */}
       <TheoryBlock
-        title="Algoritmo paso a paso"
+        title="Por qué el orden global es uno"
+        asides={[
+          {
+            label: 'Error local',
+            content: <BlockMath math="\tau_n = O(h^2)" />,
+          },
+          {
+            label: 'Error global',
+            content: <BlockMath math="E_N = |y(x_N) - y_N| = O(h)" />,
+          },
+        ]}
       >
-        <ol className="list-inside list-decimal space-y-2">
-          <li>
-            Definir <InlineMath math="f(x, y)" />, la condición
-            inicial <InlineMath math="(x_0, y_0)" />, el paso{' '}
-            <InlineMath math="h" /> y el número de pasos{' '}
-            <InlineMath math="N" />.
-          </li>
-          <li>
-            Para <InlineMath math="n = 0, 1, \ldots, N-1" />:
-            <div className="ml-6 mt-1 space-y-1">
-              <p>a) Calcular la pendiente: <InlineMath math="m_n = f(x_n, y_n)" /></p>
-              <p>
-                b) Avanzar:{' '}
-                <InlineMath math="y_{n+1} = y_n + h \cdot m_n" />
-              </p>
-              <p>
-                c) Actualizar: <InlineMath math="x_{n+1} = x_n + h" />
-              </p>
-            </div>
-          </li>
-          <li>
-            Reportar la tabla{' '}
-            <InlineMath math="\{(x_n,\, y_n)\}_{n=0}^{N}" />.
-          </li>
-        </ol>
+        <p>
+          Cada paso comete un error <InlineMath math="O(h^2)" />, pero para recorrer
+          un intervalo fijo hacen falta <InlineMath math="N = (x_f - x_0)/h" />{' '}
+          pasos. Al multiplicar, se pierde un orden: el error acumulado es{' '}
+          <InlineMath math="O(h)" />.
+        </p>
+        <p>
+          Esa resta de uno pasa en todos los métodos de este tipo, y es lo que hace
+          a Euler poco práctico. Partir <InlineMath math="h" /> por la mitad solo
+          divide el error por dos, así que ganar tres cifras cuesta mil veces más
+          trabajo. Runge-Kutta de cuarto orden lo divide por dieciséis con cuatro
+          evaluaciones por paso, y por eso es el que se usa.
+        </p>
       </TheoryBlock>
 
-      {/* Error */}
       <TheoryBlock
-        title="Análisis del error"
+        title="Estabilidad: el error que crece solo"
+        asides={[
+          {
+            label: 'Sobre y = λy',
+            content: <BlockMath math="y_{n+1} = (1 + h\lambda)\,y_n" />,
+          },
+          {
+            label: 'Condición',
+            content: <BlockMath math="|1 + h\lambda| \le 1" />,
+          },
+        ]}
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border-y border-rule py-4">
-            <p className="mb-2 text-xs text-muted-foreground">
-              Error local de truncamiento
-            </p>
-            <BlockMath math="\tau_n = \frac{h^2}{2}\,y''(\xi_n) = O(h^2)" />
-            <p className="mt-1 text-xs">
-              Error cometido en <strong className="text-foreground">un solo
-              paso</strong>, proporcional a <InlineMath math="h^2" />.
-            </p>
+        <p>
+          La precisión y la estabilidad son problemas distintos. Un método preciso
+          puede explotar igual si el paso es grande, porque el factor que multiplica
+          al error en cada iteración pasa de uno.
+        </p>
+        <p>
+          Con la ecuación de prueba <InlineMath math="y' = \lambda y" />, la
+          condición dibuja un disco de radio 1 centrado en{' '}
+          <InlineMath math="-1" />. Para <InlineMath math="\lambda" /> real
+          negativo, se traduce en <InlineMath math="h \le 2/|\lambda|" />. Por
+          encima de eso la solución numérica oscila y se va al infinito mientras la
+          exacta decae tranquilamente a cero.
+        </p>
+        <p>
+          En un sistema <strong>rígido</strong>, donde conviven escalas de tiempo
+          muy distintas, el <InlineMath math="\lambda" /> más grande manda sobre el
+          paso aunque su componente ya se haya extinguido. Ahí Euler explícito
+          obliga a pasos absurdamente pequeños, y toca cambiar a un método
+          implícito.
+        </p>
+      </TheoryBlock>
+
+      <TheoryBlock title="Qué gana y qué pierde">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-foreground">A favor</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Una evaluación de f por paso, la menor posible.</li>
+              <li>Se entiende de un vistazo y se programa en tres líneas.</li>
+              <li>Es la base de la que salen todos los demás métodos.</li>
+            </ul>
           </div>
-          <div className="border-y border-rule py-4">
-            <p className="mb-2 text-xs text-muted-foreground">
-              Error global acumulado
-            </p>
-            <BlockMath math="E_N = |y(x_N) - y_N| = O(h)" />
-            <p className="mt-1 text-xs">
-              Después de <InlineMath math="N = (x_f - x_0)/h" /> pasos, el
-              error total es de <strong className="text-foreground">primer
-              orden</strong>.
-            </p>
+          <div>
+            <p className="mb-2 text-foreground">En contra</p>
+            <ul className="list-outside list-disc space-y-1.5 pl-5">
+              <li>Orden 1: la precisión sale carísima.</li>
+              <li>Región de estabilidad pequeña, inútil con problemas rígidos.</li>
+              <li>El error se acumula sin cancelarse en tramos largos.</li>
+            </ul>
           </div>
         </div>
-        <p>
-          Reducir <InlineMath math="h" /> a la mitad divide el error global
-          aproximadamente por 2, pero duplica el número de evaluaciones
-          de <InlineMath math="f" />.
-        </p>
-      </TheoryBlock>
-
-      {/* Estabilidad */}
-      <TheoryBlock
-        title="Estabilidad"
-        asides={[
-          { content: (
-            <>
-          <BlockMath math="y_{n+1} = (1 + h\lambda)\,y_n" />
-            </>
-          ) },
-        ]}
-      >
-        <p>
-          Aplicando Euler a la ecuación modelo{' '}
-          <InlineMath math="y' = \lambda y" /> con{' '}
-          <InlineMath math="\lambda \in \mathbb{C}" />:
-        </p>
-        <p>
-          La solución numérica es estable si y sólo si{' '}
-          <InlineMath math="|1 + h\lambda| \leq 1" />, lo que define un
-          disco de radio 1 centrado en <InlineMath math="-1" /> en el
-          plano complejo.
-        </p>
-        <p>
-          Para problemas <strong className="text-foreground">stiff</strong>{' '}
-          (ecuaciones rígidas), Euler explícito requiere{' '}
-          <InlineMath math="h" /> extremadamente pequeño y se prefieren
-          métodos implícitos.
-        </p>
-      </TheoryBlock>
-
-      {/* Ventajas y limitaciones */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <TheoryBlock
-          title="Ventajas"
-        >
-          <ul className="list-inside list-disc space-y-1">
-            <li>Extremadamente simple de implementar y entender.</li>
-            <li>Bajo costo computacional por paso.</li>
-            <li>Base pedagógica para métodos superiores.</li>
-            <li>Fácilmente extensible a sistemas de EDOs.</li>
-          </ul>
-        </TheoryBlock>
-        <TheoryBlock
-          title="Limitaciones"
-        >
-          <ul className="list-inside list-disc space-y-1">
-            <li>Precisión de primer orden — error global O(h).</li>
-            <li>Región de estabilidad pequeña.</li>
-            <li>Inadecuado para problemas stiff sin h muy pequeño.</li>
-            <li>El error se acumula en intervalos largos.</li>
-          </ul>
-        </TheoryBlock>
-      </div>
-
-      {/* Métodos relacionados */}
-      <TheoryBlock
-        title="Métodos relacionados"
-      >
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">Heun (Euler mejorado) — O(h²)</Badge>
-          <Badge variant="secondary">Runge-Kutta 4 — O(h⁴)</Badge>
-          <Badge variant="secondary">Euler implícito — A-estable</Badge>
-          <Badge variant="secondary">Adams-Bashforth — multipaso</Badge>
-        </div>
-        <p className="mt-2">
-          El método de <strong className="text-foreground">Heun</strong>{' '}
-          promedia la pendiente en ambos extremos del paso, logrando
-          segundo orden. <strong className="text-foreground">Runge-Kutta
-          de orden 4</strong> (RK4) evalúa la pendiente en cuatro puntos
-          intermedios y es el estándar práctico para EDOs no stiff.
+        <p className="mt-4">
+          Se estudia porque enseña el mecanismo entero, no porque se use. En cuanto
+          el problema es real, Runge-Kutta 4 da mucha más precisión por el mismo
+          coste de cálculo.
         </p>
       </TheoryBlock>
     </TheoryStack>
