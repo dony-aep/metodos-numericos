@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
   TrendingUp,
@@ -28,6 +27,7 @@ import {
 } from '@/components/ui/table';
 import type { IntegrationResult } from '@/types/numerical-integration';
 import { createMathFunction, generateFunctionPoints } from '@/utils/mathParser';
+import { useChartTheme } from '@/lib/chartTheme';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -38,8 +38,7 @@ function formatNumber(value: number): string {
 }
 
 function IntegrationPlot({ result }: { result: IntegrationResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -72,18 +71,16 @@ function IntegrationPlot({ result }: { result: IntegrationResult }) {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
         textStyle: {
-          color: isDark ? '#e2e8f0' : '#334155',
+          color: chart.text,
           fontSize: 12,
         },
       },
       legend: {
         top: 0,
-        textStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        textStyle: { color: chart.label, fontSize: 11 },
       },
       grid: isMobile
         ? { top: 25, right: 10, bottom: 30, left: 35 }
@@ -91,32 +88,32 @@ function IntegrationPlot({ result }: { result: IntegrationResult }) {
       xAxis: {
         type: 'value',
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
       yAxis: {
         type: 'value',
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -128,7 +125,7 @@ function IntegrationPlot({ result }: { result: IntegrationResult }) {
           smooth: true,
           showSymbol: false,
           lineStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
+            color: chart.series,
             width: 2.5,
           },
           z: 3,
@@ -139,12 +136,12 @@ function IntegrationPlot({ result }: { result: IntegrationResult }) {
           data: areaData,
           showSymbol: false,
           lineStyle: {
-            color: isDark ? '#a1a1aa' : '#71717a',
+            color: chart.palette[1],
             width: 1,
             type: 'dashed',
           },
           areaStyle: {
-            color: isDark
+            color: chart.isDark
               ? 'rgba(161,161,170,0.15)'
               : 'rgba(113,113,122,0.12)',
           },
@@ -156,32 +153,33 @@ function IntegrationPlot({ result }: { result: IntegrationResult }) {
           data: nodeData,
           symbolSize: 8,
           itemStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
-            borderColor: isDark ? '#fafafa' : '#18181b',
+            color: chart.palette[1],
+            borderColor: chart.text,
             borderWidth: 2,
           },
           z: 4,
         },
       ],
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
           Gráfica de integración
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 260 : 350 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
@@ -189,8 +187,7 @@ function IntegrationPlot({ result }: { result: IntegrationResult }) {
 }
 
 function ConvergencePlot({ result }: { result: IntegrationResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -206,18 +203,16 @@ function ConvergencePlot({ result }: { result: IntegrationResult }) {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
         textStyle: {
-          color: isDark ? '#e2e8f0' : '#334155',
+          color: chart.text,
           fontSize: 12,
         },
       },
       legend: {
         top: 0,
-        textStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        textStyle: { color: chart.label, fontSize: 11 },
       },
       grid: isMobile
         ? { top: 25, right: 10, bottom: 30, left: 40 }
@@ -228,20 +223,20 @@ function ConvergencePlot({ result }: { result: IntegrationResult }) {
         nameLocation: 'center',
         nameGap: 25,
         nameTextStyle: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -249,20 +244,20 @@ function ConvergencePlot({ result }: { result: IntegrationResult }) {
         type: 'value',
         name: '∫f(x)dx',
         nameTextStyle: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -273,10 +268,10 @@ function ConvergencePlot({ result }: { result: IntegrationResult }) {
           data: trapData,
           symbolSize: 6,
           lineStyle: {
-            color: isDark ? '#a1a1aa' : '#71717a',
+            color: chart.series,
             width: 2,
           },
-          itemStyle: { color: isDark ? '#a1a1aa' : '#71717a' },
+          itemStyle: { color: chart.series },
         },
         ...(simpData.length > 0
           ? [
@@ -286,12 +281,13 @@ function ConvergencePlot({ result }: { result: IntegrationResult }) {
                 data: simpData,
                 symbolSize: 6,
                 lineStyle: {
-                  color: isDark ? '#e4e4e7' : '#3f3f46',
+                  color: chart.neutralSeries,
                   width: 2.5,
+                  type: 'dashed' as const,
                 },
                 itemStyle: {
-                  color: isDark ? '#e4e4e7' : '#3f3f46',
-                  borderColor: isDark ? '#fafafa' : '#18181b',
+                  color: chart.neutralSeries,
+                  borderColor: chart.text,
                   borderWidth: 2,
                 },
               },
@@ -299,31 +295,32 @@ function ConvergencePlot({ result }: { result: IntegrationResult }) {
           : []),
       ],
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
           Convergencia al aumentar n
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 240 : 300 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function NumericalIntegrationResults({
+export function NumericalIntegrationReadout({
   result,
 }: {
   result: IntegrationResult;
@@ -333,11 +330,11 @@ export function NumericalIntegrationResults({
   const hasErrors = trapError !== null;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Resumen */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
@@ -361,11 +358,11 @@ export function NumericalIntegrationResults({
           {/* Method results side by side */}
           <div className="grid gap-3 sm:grid-cols-2">
             {/* Trapecio */}
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Trapecio — <InlineMath math="O(h^2)" />
               </p>
-              <p className="font-mono text-lg font-medium tabular-nums">
+              <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">
                 {formatNumber(result.trapezoid.value)}
               </p>
               {hasErrors && trapError !== null && (
@@ -386,11 +383,11 @@ export function NumericalIntegrationResults({
 
             {/* Simpson */}
             {result.simpson ? (
-              <div className="rounded-lg border border-border bg-muted/20 p-3">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="border-y border-rule py-4">
+                <p className="mb-2 text-xs text-muted-foreground">
                   Simpson 1/3 — <InlineMath math="O(h^4)" />
                 </p>
-                <p className="font-mono text-lg font-medium tabular-nums">
+                <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">
                   {formatNumber(result.simpson.value)}
                 </p>
                 {hasErrors && simpError !== null && (
@@ -409,7 +406,7 @@ export function NumericalIntegrationResults({
                 )}
               </div>
             ) : (
-              <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-800 dark:bg-amber-950/20">
+              <div className="border-y border-rule py-4">
                 <p className="text-xs text-amber-700 dark:text-amber-300">
                   Simpson requiere un número par de subintervalos (n = {result.n}{' '}
                   es impar).
@@ -419,14 +416,36 @@ export function NumericalIntegrationResults({
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+export function NumericalIntegrationPlots({
+  result,
+}: {
+  result: IntegrationResult;
+}) {
+  return (
+    <div className="grid gap-8 xl:grid-cols-2">
       {/* Gráfica */}
       <IntegrationPlot result={result} />
+      {/* Convergencia */}
+      <ConvergencePlot result={result} />
+    </div>
+  );
+}
 
+export function NumericalIntegrationTables({
+  result,
+}: {
+  result: IntegrationResult;
+}) {
+  return (
+    <div className="space-y-10">
       {/* Tabla de nodos */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Table2 className="h-4 w-4 text-muted-foreground" />
             Nodos de evaluación
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -434,25 +453,25 @@ export function NumericalIntegrationResults({
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     i
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     <InlineMath math="x_i" />
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     <InlineMath math="f(x_i)" />
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Peso Trap.
                   </TableHead>
                   {result.simpson && (
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                    <TableHead className="text-right">
                       Peso Simp.
                     </TableHead>
                   )}
@@ -485,14 +504,10 @@ export function NumericalIntegrationResults({
           </div>
         </CardContent>
       </Card>
-
-      {/* Convergencia */}
-      <ConvergencePlot result={result} />
-
       {/* Tabla de convergencia */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
             Estudio de convergencia
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -500,18 +515,18 @@ export function NumericalIntegrationResults({
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     n
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Trapecio
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Simpson
                   </TableHead>
                 </TableRow>

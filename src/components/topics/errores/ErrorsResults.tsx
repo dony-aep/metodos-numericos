@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import { CheckCircle2, Table2, Activity } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useResponsive';
 import { InlineMath } from '@/components/shared/MathRenderer';
@@ -15,6 +14,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { ErrorsResult, TaylorResult } from '@/types/errors';
+import { useChartTheme } from '@/lib/chartTheme';
+import { ErrorBar } from '@/components/shared/ErrorBar';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -32,9 +33,9 @@ export function ErrorsResults({ errorsResult, taylorResult }: { errorsResult: Er
 
 function ErrorsSummary({ result }: { result: ErrorsResult }) {
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           Resultados del análisis de error
         </CardTitle>
@@ -55,9 +56,9 @@ function ErrorsSummary({ result }: { result: ErrorsResult }) {
 
 function MetricCard({ label, value, formula }: { label: string; value: string; formula?: string }) {
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-1">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="font-mono text-lg font-semibold text-foreground">{value}</p>
+    <div className="border-y border-rule py-4 space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">{value}</p>
       {formula && (
         <div className="pt-1">
           <InlineMath math={formula} />
@@ -68,8 +69,7 @@ function MetricCard({ label, value, formula }: { label: string; value: string; f
 }
 
 function TaylorResults({ result }: { result: TaylorResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const chartOption = useMemo((): EChartsOption => {
@@ -79,9 +79,9 @@ function TaylorResults({ result }: { result: TaylorResult }) {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        backgroundColor: isDark ? 'rgba(15,23,42,0.96)' : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDark ? '#e2e8f0' : '#334155', fontSize: 12 },
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
+        textStyle: { color: chart.text, fontSize: 12 },
       },
       grid: { top: 40, right: 20, bottom: 40, left: isMobile ? 50 : 60 },
       xAxis: {
@@ -90,17 +90,18 @@ function TaylorResults({ result }: { result: TaylorResult }) {
         name: 'Grado',
         nameLocation: 'middle',
         nameGap: 25,
-        axisLine: { lineStyle: { color: isDark ? '#475569' : '#cbd5e1' } },
-        axisLabel: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 11 },
+        axisLine: { lineStyle: { color: chart.axis } },
+        axisLabel: { color: chart.label, fontSize: 11 },
+        splitLine: { lineStyle: { color: chart.grid } },
       },
       yAxis: {
         type: 'log',
         name: 'Error',
         nameLocation: 'middle',
         nameGap: isMobile ? 35 : 45,
-        axisLine: { lineStyle: { color: isDark ? '#475569' : '#cbd5e1' } },
-        axisLabel: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 11 },
-        splitLine: { lineStyle: { color: isDark ? '#1e293b' : '#f1f5f9' } },
+        axisLine: { lineStyle: { color: chart.axis } },
+        axisLabel: { color: chart.label, fontSize: 11 },
+        splitLine: { lineStyle: { color: chart.grid } },
       },
       series: [
         {
@@ -108,19 +109,19 @@ function TaylorResults({ result }: { result: TaylorResult }) {
           data: data.map((d) => d[1] || 1e-16),
           smooth: true,
           lineStyle: { width: 2 },
-          itemStyle: { color: isDark ? '#60a5fa' : '#3b82f6' },
-          areaStyle: { color: isDark ? 'rgba(96,165,250,0.08)' : 'rgba(59,130,246,0.06)' },
+          itemStyle: { color: chart.series },
+          areaStyle: { color: chart.seriesSoft },
         },
       ],
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
     <div className="space-y-4">
       {/* Summary */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             Aproximación de Taylor
           </CardTitle>
@@ -141,9 +142,9 @@ function TaylorResults({ result }: { result: TaylorResult }) {
       </Card>
 
       {/* Table */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Table2 className="h-4 w-4 text-muted-foreground" />
             Tabla de convergencia
           </CardTitle>
@@ -162,7 +163,9 @@ function TaylorResults({ result }: { result: TaylorResult }) {
                 <TableRow key={t.n}>
                   <TableCell className="font-mono">{t.n}</TableCell>
                   <TableCell className="font-mono">{formatNumber(t.approximation)}</TableCell>
-                  <TableCell className="font-mono">{formatNumber(t.error)}</TableCell>
+                  <TableCell>
+                    <ErrorBar error={t.error} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -171,9 +174,9 @@ function TaylorResults({ result }: { result: TaylorResult }) {
       </Card>
 
       {/* Chart */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-muted-foreground" />
             Convergencia del error
           </CardTitle>

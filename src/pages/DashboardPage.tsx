@@ -1,89 +1,82 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
+import { InlineMath } from '@/components/shared/MathRenderer';
+import { MarginGrid, MarginSection } from '@/components/shared/MarginLayout';
+import { METHOD_FAMILIES } from '@/data/families';
 import { NUMERICAL_METHODS } from '@/data/methods';
-import { cn } from '@/lib/utils';
-
-const availableCount = NUMERICAL_METHODS.filter((m) => m.status === 'available').length;
 
 export function DashboardPage() {
+  const families = METHOD_FAMILIES.map((family) => ({
+    family,
+    methods: NUMERICAL_METHODS.filter((method) => method.family === family.id),
+  })).filter((entry) => entry.methods.length > 0);
+
   return (
-    <div>
-      {/* Hero */}
-      <header className="flex items-start justify-between gap-6 border-b border-border pb-8 pt-2">
-        <div className="min-w-0">
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-            Análisis numérico
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Métodos Numéricos
-          </h1>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Módulos con teoría, calculadora interactiva y visualización de
-            resultados. Selecciona un tema para comenzar.
-          </p>
-        </div>
-        <div className="hidden shrink-0 flex-col items-end sm:flex">
-          <span className="select-none font-mono text-7xl font-thin leading-none tabular-nums text-muted-foreground/25">
-            {availableCount.toString().padStart(2, '0')}
-          </span>
-          <span className="mt-1 text-xs text-muted-foreground">
-            / {NUMERICAL_METHODS.length} módulos disponibles
-          </span>
-        </div>
-      </header>
+    <MarginGrid>
+      <MarginSection contentClassName="py-10 lg:py-14">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-[2.5rem] sm:leading-none">
+          Métodos numéricos
+        </h1>
+        <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+          Cada módulo trae la teoría del método, una calculadora para probarlo
+          con tus propios datos y la tabla de iteraciones que enseña cómo llega
+          al resultado.
+        </p>
+      </MarginSection>
 
-      {/* Section label */}
-      <div className="flex items-center gap-3 py-5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Todos los módulos
-        </span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
+      {families.map(({ family, methods }, index) => (
+        <MarginSection
+          key={family.id}
+          label={family.label}
+          note={family.summary}
+          divider={index < families.length - 1}
+          contentClassName="py-3 lg:py-3"
+        >
+          <ul>
+            {methods.map((method, position) => {
+              const isLast = position === methods.length - 1;
+              const rowEdge = isLast ? '' : 'border-b border-rule';
 
-      {/* Mosaic grid */}
-      <div className="grid gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-        {NUMERICAL_METHODS.map((method, index) => {
-          const isAvailable = method.status === 'available';
-          const num = (index + 1).toString().padStart(2, '0');
+              if (method.status !== 'available') {
+                return (
+                  <li key={method.slug} className={`py-4 opacity-50 ${rowEdge}`}>
+                    <p className="text-[15px] font-medium">{method.title}</p>
+                    <p className="mt-1.5 text-[13px] text-muted-foreground">
+                      En preparación
+                    </p>
+                  </li>
+                );
+              }
 
-          return (
-            <div
-              key={method.slug}
-              className={cn(
-                'group flex flex-col gap-3 bg-background p-5 transition-colors',
-                isAvailable ? 'hover:bg-muted/40' : 'opacity-50'
-              )}
-            >
-              <span className="font-mono text-[11px] tabular-nums text-muted-foreground/40">
-                {num}
-              </span>
-              <div className="flex-1 space-y-1.5">
-                <h2 className="text-sm font-semibold leading-snug">
-                  {method.title}
-                </h2>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {method.shortDescription}
-                </p>
-              </div>
-              <div className="border-t border-border pt-3">
-                {isAvailable ? (
+              return (
+                <li key={method.slug} className={rowEdge}>
                   <Link
                     to={`/metodos/${method.slug}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium transition-all hover:gap-2.5"
+                    className="group flex items-center gap-6 py-4 lg:gap-10"
                   >
-                    Entrar al módulo
-                    <ArrowRight className="h-3 w-3" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[15px] font-medium">
+                        {method.title}
+                      </span>
+                      <span className="mt-1.5 block text-[13px] leading-relaxed text-muted-foreground">
+                        {method.shortDescription}
+                      </span>
+                    </span>
+
+                    {/* Un método se reconoce por su fórmula antes que por su
+                        nombre; en pantallas estrechas no cabe y se cae. */}
+                    <span className="hidden shrink-0 overflow-hidden text-right text-muted-foreground lg:block lg:w-64">
+                      <InlineMath math={method.formulas[0].latex} />
+                    </span>
+
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
                   </Link>
-                ) : (
-                  <span className="text-xs text-muted-foreground/50">
-                    En preparación
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+                </li>
+              );
+            })}
+          </ul>
+        </MarginSection>
+      ))}
+    </MarginGrid>
   );
 }

@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
   TrendingUp,
@@ -26,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { EulerResult } from '@/types/euler';
+import { useChartTheme } from '@/lib/chartTheme';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -36,8 +36,7 @@ function formatNumber(value: number): string {
 }
 
 function SolutionPlot({ result }: { result: EulerResult }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -51,12 +50,12 @@ function SolutionPlot({ result }: { result: EulerResult }) {
         data: eulerData,
         symbolSize: 8,
         lineStyle: {
-          color: isDark ? '#a1a1aa' : '#71717a',
+          color: chart.series,
           width: 2,
         },
         itemStyle: {
-          color: isDark ? '#a1a1aa' : '#71717a',
-          borderColor: isDark ? '#d4d4d8' : '#52525b',
+          color: chart.series,
+          borderColor: chart.series,
           borderWidth: 2,
         },
       },
@@ -75,8 +74,9 @@ function SolutionPlot({ result }: { result: EulerResult }) {
         smooth: true,
         showSymbol: false,
         lineStyle: {
-          color: isDark ? '#e4e4e7' : '#3f3f46',
+          color: chart.neutralSeries,
           width: 2.5,
+          type: 'dashed',
         },
         z: 2,
       });
@@ -86,18 +86,16 @@ function SolutionPlot({ result }: { result: EulerResult }) {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
         textStyle: {
-          color: isDark ? '#e2e8f0' : '#334155',
+          color: chart.text,
           fontSize: 12,
         },
       },
       legend: {
         top: 0,
-        textStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        textStyle: { color: chart.label, fontSize: 11 },
       },
       grid: isMobile
         ? { top: 25, right: 10, bottom: 30, left: 40 }
@@ -108,20 +106,20 @@ function SolutionPlot({ result }: { result: EulerResult }) {
         nameLocation: 'center',
         nameGap: 25,
         nameTextStyle: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -129,59 +127,60 @@ function SolutionPlot({ result }: { result: EulerResult }) {
         type: 'value',
         name: 'y',
         nameTextStyle: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
       series,
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
           Curva solución
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 260 : 350 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function EulerResults({ result }: { result: EulerResult }) {
+export function EulerReadout({ result }: { result: EulerResult }) {
   const hasExact = result.data.some((s) => s.exactY !== null);
   const lastStep = result.data[result.data.length - 1];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Resumen */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
@@ -204,20 +203,20 @@ export function EulerResults({ result }: { result: EulerResult }) {
 
           {/* Final value */}
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Valor final — <InlineMath math={`y(${formatNumber(lastStep.x)})`} />
               </p>
-              <p className="font-mono text-lg font-medium tabular-nums">
+              <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">
                 {formatNumber(lastStep.y)}
               </p>
             </div>
             {hasExact && lastStep.exactY !== null && (
-              <div className="rounded-lg border border-border bg-muted/20 p-3">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="border-y border-rule py-4">
+                <p className="mb-2 text-xs text-muted-foreground">
                   Valor exacto
                 </p>
-                <p className="font-mono text-lg font-medium tabular-nums">
+                <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">
                   {formatNumber(lastStep.exactY)}
                 </p>
                 {lastStep.error !== null && (
@@ -239,14 +238,28 @@ export function EulerResults({ result }: { result: EulerResult }) {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+export function EulerPlots({ result }: { result: EulerResult }) {
+  return (
+    <div>
       {/* Gráfica */}
       <SolutionPlot result={result} />
+    </div>
+  );
+}
 
+export function EulerTables({ result }: { result: EulerResult }) {
+  const hasExact = result.data.some((s) => s.exactY !== null);
+
+  return (
+    <div className="space-y-10">
       {/* Tabla de iteraciones */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Table2 className="h-4 w-4 text-muted-foreground" />
             Tabla de iteraciones
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -254,29 +267,29 @@ export function EulerResults({ result }: { result: EulerResult }) {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     n
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     <InlineMath math="x_n" />
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     <InlineMath math="y_n" />
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     <InlineMath math="f(x_n, y_n)" />
                   </TableHead>
                   {hasExact && (
                     <>
-                      <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                      <TableHead className="text-right">
                         Exacta
                       </TableHead>
-                      <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                      <TableHead className="text-right">
                         |Error|
                       </TableHead>
                     </>

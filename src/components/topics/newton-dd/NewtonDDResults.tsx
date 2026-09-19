@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import { CheckCircle2, Grid3X3, LineChart as LineChartIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useResponsive';
@@ -22,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { InterpolationResult, DataPoint } from '@/types/interpolation';
+import { useChartTheme } from '@/lib/chartTheme';
 
 interface NewtonDDResultsProps {
   result: InterpolationResult;
@@ -43,8 +43,7 @@ function NewtonDDPlot({
   result: InterpolationResult;
   points: DataPoint[];
 }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -62,24 +61,24 @@ function NewtonDDPlot({
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        backgroundColor: isDark ? 'rgba(15,23,42,0.96)' : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDark ? '#e2e8f0' : '#334155', fontSize: 12 },
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
+        textStyle: { color: chart.text, fontSize: 12 },
       },
       grid: isMobile
         ? { top: 30, right: 10, bottom: 30, left: 35 }
         : { top: 40, right: 20, bottom: 40, left: 50 },
       xAxis: {
         type: 'value',
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
-        splitLine: { lineStyle: { color: isDark ? '#334155' : '#e2e8f0', type: 'dashed' } },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        axisLine: { lineStyle: { color: chart.axis } },
+        splitLine: { lineStyle: { color: chart.grid, type: 'dashed' } },
+        axisLabel: { color: chart.label, fontSize: 11 },
       },
       yAxis: {
         type: 'value',
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
-        splitLine: { lineStyle: { color: isDark ? '#334155' : '#e2e8f0', type: 'dashed' } },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        axisLine: { lineStyle: { color: chart.axis } },
+        splitLine: { lineStyle: { color: chart.grid, type: 'dashed' } },
+        axisLabel: { color: chart.label, fontSize: 11 },
       },
       series: [
         {
@@ -88,7 +87,7 @@ function NewtonDDPlot({
           data: curveData,
           smooth: false,
           showSymbol: false,
-          lineStyle: { color: isDark ? '#a1a1aa' : '#71717a', width: 2 },
+          lineStyle: { color: chart.series, width: 2 },
         },
         {
           name: 'Datos',
@@ -96,8 +95,8 @@ function NewtonDDPlot({
           data: pointData,
           symbolSize: 10,
           itemStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
-            borderColor: isDark ? '#fafafa' : '#18181b',
+            color: chart.neutralSeries,
+            borderColor: chart.text,
             borderWidth: 2,
           },
         },
@@ -110,8 +109,8 @@ function NewtonDDPlot({
                 symbolSize: 14,
                 symbol: 'diamond',
                 itemStyle: {
-                  color: isDark ? '#34d399' : '#10b981',
-                  borderColor: isDark ? '#6ee7b7' : '#059669',
+                  color: chart.palette[2],
+                  borderColor: chart.palette[2],
                   borderWidth: 2,
                 },
               },
@@ -119,41 +118,43 @@ function NewtonDDPlot({
           : []),
       ],
     };
-  }, [result, points, isDark, isMobile]);
+  }, [result, points, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <LineChartIcon className="h-4 w-4 text-muted-foreground" />
           Gráfica del polinomio de Newton
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
-          <ReactECharts option={option} style={{ height: isMobile ? 260 : 350 }} notMerge lazyUpdate />
+        <div>
+          <ReactECharts option={option} style={{ height: isMobile ? 260 : 350 }} notMerge lazyUpdate
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function NewtonDDResults({ result, points }: NewtonDDResultsProps) {
+export function NewtonDDReadout({ result, points }: NewtonDDResultsProps) {
   const { dividedDifferences: dd } = result;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Diagnóstico */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Badge
-            className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+            className="text-xs text-emerald-700 dark:text-emerald-300"
             variant="outline"
           >
             Grado {result.n}
@@ -163,7 +164,7 @@ export function NewtonDDResults({ result, points }: NewtonDDResultsProps) {
           </Badge>
           {result.evaluateAt !== null && result.evaluatedValue !== null ? (
             <Badge
-              className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+              className="text-xs text-emerald-700 dark:text-emerald-300"
               variant="outline"
             >
               P({formatNumber(result.evaluateAt)}) ={' '}
@@ -172,14 +173,75 @@ export function NewtonDDResults({ result, points }: NewtonDDResultsProps) {
           ) : null}
         </CardContent>
       </Card>
+      {/* Forma del polinomio de Newton */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Polinomio de Newton</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-baseline gap-x-1 gap-y-1 text-sm">
+            <span className="font-medium">
+              P<sub>{result.n}</sub>(x) =
+            </span>
+            {dd.coefficients.map((coef, k) => {
+              const sign = coef >= 0 ? (k > 0 ? ' + ' : '') : ' − ';
+              const absCoef = Math.abs(coef);
+              const factors =
+                k === 0
+                  ? ''
+                  : Array.from({ length: k })
+                      .map((_, j) => `(x − ${points[j].x})`)
+                      .join('');
+              return (
+                <span key={`term-${k}`} className="font-mono tabular-nums whitespace-nowrap">
+                  {sign}
+                  {formatNumber(absCoef)}
+                  {factors}
+                </span>
+              );
+            })}
+          </div>
 
+          {/* Coeficientes como mini-tabla */}
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {dd.coefficients.map((coef, i) => (
+              <div
+                key={`coef-card-${i}`}
+                className="flex items-center justify-between border-b border-rule py-2.5"
+              >
+                <span className="text-xs text-muted-foreground">
+                  <InlineMath math={i === 0 ? 'f[x_0]' : `f[x_0,\\dots,x_{${i}}]`} />
+                </span>
+                <span className="font-mono text-sm tabular-nums font-medium">
+                  {formatNumber(coef)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export function NewtonDDPlots({ result, points }: NewtonDDResultsProps) {
+  return (
+    <div>
       {/* Gráfica */}
       <NewtonDDPlot result={result} points={points} />
+    </div>
+  );
+}
 
+export function NewtonDDTables({ result, points }: NewtonDDResultsProps) {
+  const { dividedDifferences: dd } = result;
+
+  return (
+    <div className="space-y-10">
       {/* Tabla de diferencias divididas — enfoque principal */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Grid3X3 className="h-4 w-4 text-muted-foreground" />
             Tabla de diferencias divididas
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -187,21 +249,21 @@ export function NewtonDDResults({ result, points }: NewtonDDResultsProps) {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     i
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     x<sub>i</sub>
                   </TableHead>
                   {Array.from({ length: dd.coefficients.length }).map((_, col) => (
                     <TableHead
                       key={`dd-h-${col}`}
-                      className="text-right text-[10px] font-semibold uppercase tracking-wider"
+                      className="text-right"
                     >
                       {col === 0 ? 'f[xᵢ]' : `Orden ${col}`}
                     </TableHead>
@@ -237,54 +299,6 @@ export function NewtonDDResults({ result, points }: NewtonDDResultsProps) {
                 ))}
               </TableBody>
             </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Forma del polinomio de Newton */}
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Polinomio de Newton</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-wrap items-baseline gap-x-1 gap-y-1 text-sm">
-            <span className="font-medium">
-              P<sub>{result.n}</sub>(x) =
-            </span>
-            {dd.coefficients.map((coef, k) => {
-              const sign = coef >= 0 ? (k > 0 ? ' + ' : '') : ' − ';
-              const absCoef = Math.abs(coef);
-              const factors =
-                k === 0
-                  ? ''
-                  : Array.from({ length: k })
-                      .map((_, j) => `(x − ${points[j].x})`)
-                      .join('');
-              return (
-                <span key={`term-${k}`} className="font-mono tabular-nums whitespace-nowrap">
-                  {sign}
-                  {formatNumber(absCoef)}
-                  {factors}
-                </span>
-              );
-            })}
-          </div>
-
-          {/* Coeficientes como mini-tabla */}
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {dd.coefficients.map((coef, i) => (
-              <div
-                key={`coef-card-${i}`}
-                className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2"
-              >
-                <span className="text-xs text-muted-foreground">
-                  <InlineMath math={i === 0 ? 'f[x_0]' : `f[x_0,\\dots,x_{${i}}]`} />
-                </span>
-                <span className="font-mono text-sm tabular-nums font-medium">
-                  {formatNumber(coef)}
-                </span>
-              </div>
-            ))}
           </div>
         </CardContent>
       </Card>

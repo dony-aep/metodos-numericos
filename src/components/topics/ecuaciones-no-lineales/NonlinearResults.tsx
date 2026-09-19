@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import { Table2, Activity } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useResponsive';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +14,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { NonlinearComparison } from '@/types/nonlinear';
+import { useChartTheme } from '@/lib/chartTheme';
+import { ErrorBar } from '@/components/shared/ErrorBar';
 
 function formatNum(v: number): string {
   if (!Number.isFinite(v)) return '—';
@@ -23,13 +24,40 @@ function formatNum(v: number): string {
   return v.toFixed(10);
 }
 
-const METHOD_COLORS = ['#3b82f6', '#ef4444', '#10b981'];
+export function NonlinearReadout({ comparison }: { comparison: NonlinearComparison }) {
+  const chart = useChartTheme();
 
-export function NonlinearResults({ comparison }: { comparison: NonlinearComparison }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  return (
+    <div className="space-y-8">
+      {/* Summary cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {comparison.results.map((r, i) => (
+          <Card key={r.method}>
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span
+                  aria-hidden="true"
+                  className="h-0.5 w-4 shrink-0"
+                  style={{ backgroundColor: chart.palette[i % chart.palette.length] }}
+                />
+                <span className="text-sm font-semibold text-foreground">{r.methodLabel}</span>
+                <Badge variant={r.converged ? 'default' : 'destructive'} className="ml-auto text-[10px]">
+                  {r.converged ? 'Convergió' : 'No convergió'}
+                </Badge>
+              </div>
+              <p className="font-mono text-2xl tracking-tight sm:text-[1.75rem]">{formatNum(r.root)}</p>
+              <p className="text-xs text-muted-foreground">{r.iterations.length} iteraciones</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function NonlinearPlots({ comparison }: { comparison: NonlinearComparison }) {
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
-
   const chartOption = useMemo((): EChartsOption => {
     const series = comparison.results.map((r, i) => ({
       name: r.methodLabel,
@@ -37,68 +65,51 @@ export function NonlinearResults({ comparison }: { comparison: NonlinearComparis
       data: r.iterations.map((it) => [it.n, it.error || 1e-16]),
       smooth: true,
       lineStyle: { width: 2 },
-      itemStyle: { color: METHOD_COLORS[i % METHOD_COLORS.length] },
+      itemStyle: { color: chart.palette[i % chart.palette.length] },
     }));
 
     return {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        backgroundColor: isDark ? 'rgba(15,23,42,0.96)' : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDark ? '#e2e8f0' : '#334155', fontSize: 12 },
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
+        textStyle: { color: chart.text, fontSize: 12 },
       },
       legend: {
         data: comparison.results.map((r) => r.methodLabel),
-        textStyle: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 11 },
+        top: 0,
+        textStyle: { color: chart.label, fontSize: 11 },
       },
-      grid: { top: 50, right: 20, bottom: 40, left: isMobile ? 50 : 60 },
+      grid: { top: 46, right: 20, bottom: 44, left: isMobile ? 50 : 60 },
       xAxis: {
         type: 'value',
         name: 'Iteración',
         nameLocation: 'middle',
         nameGap: 25,
-        axisLine: { lineStyle: { color: isDark ? '#475569' : '#cbd5e1' } },
-        axisLabel: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 11 },
+        axisLine: { lineStyle: { color: chart.axis } },
+        axisLabel: { color: chart.label, fontSize: 11 },
+        splitLine: { lineStyle: { color: chart.grid } },
       },
       yAxis: {
         type: 'log',
         name: 'Error',
         nameLocation: 'middle',
         nameGap: isMobile ? 35 : 45,
-        axisLine: { lineStyle: { color: isDark ? '#475569' : '#cbd5e1' } },
-        axisLabel: { color: isDark ? '#94a3b8' : '#64748b', fontSize: 11 },
-        splitLine: { lineStyle: { color: isDark ? '#1e293b' : '#f1f5f9' } },
+        axisLine: { lineStyle: { color: chart.axis } },
+        axisLabel: { color: chart.label, fontSize: 11 },
+        splitLine: { lineStyle: { color: chart.grid } },
       },
       series,
     };
-  }, [comparison, isDark, isMobile]);
+  }, [comparison, chart, isMobile]);
 
   return (
-    <div className="space-y-4">
-      {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {comparison.results.map((r, i) => (
-          <Card key={r.method} className="border-border bg-card">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: METHOD_COLORS[i] }} />
-                <span className="text-sm font-semibold text-foreground">{r.methodLabel}</span>
-                <Badge variant={r.converged ? 'default' : 'destructive'} className="ml-auto text-[10px]">
-                  {r.converged ? 'Convergió' : 'No convergió'}
-                </Badge>
-              </div>
-              <p className="font-mono text-lg font-semibold">{formatNum(r.root)}</p>
-              <p className="text-xs text-muted-foreground">{r.iterations.length} iteraciones</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
+    <div>
       {/* Convergence chart */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-muted-foreground" />
             Comparación de convergencia
           </CardTitle>
@@ -111,12 +122,18 @@ export function NonlinearResults({ comparison }: { comparison: NonlinearComparis
           />
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+export function NonlinearTables({ comparison }: { comparison: NonlinearComparison }) {
+  return (
+    <div className="space-y-10">
       {/* Iteration tables */}
       {comparison.results.map((r) => (
-        <Card key={r.method} className="border-border bg-card">
+        <Card key={r.method}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2">
               <Table2 className="h-4 w-4 text-muted-foreground" />
               Iteraciones — {r.methodLabel}
             </CardTitle>
@@ -141,7 +158,9 @@ export function NonlinearResults({ comparison }: { comparison: NonlinearComparis
                     {r.method === 'bisection' && <TableCell className="font-mono">{formatNum(it.b!)}</TableCell>}
                     <TableCell className="font-mono">{formatNum(it.x)}</TableCell>
                     <TableCell className="font-mono">{formatNum(it.fx)}</TableCell>
-                    <TableCell className="font-mono">{formatNum(it.error)}</TableCell>
+                    <TableCell>
+                      <ErrorBar error={it.error} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

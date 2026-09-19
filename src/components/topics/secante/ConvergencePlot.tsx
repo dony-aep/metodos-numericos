@@ -1,12 +1,12 @@
 import { useMemo, useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import type { SecantIteration } from '@/types/secant';
 import { generateErrorData } from '@/utils/plotHelpers';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TrendingDown, Mouse, Hand, Wrench } from 'lucide-react';
 import { useIsMobile } from '@/hooks/useResponsive';
+import { useChartTheme } from '@/lib/chartTheme';
 
 interface ConvergencePlotProps {
   iterations: SecantIteration[];
@@ -15,8 +15,7 @@ interface ConvergencePlotProps {
 export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
   const chartRef = useRef<ReactECharts>(null);
   const isMobile = useIsMobile();
-  const { resolvedTheme } = useTheme();
-  const isDarkTheme = resolvedTheme === 'dark';
+  const chart = useChartTheme();
 
   const chartOption = useMemo((): EChartsOption => {
     if (iterations.length === 0) {
@@ -25,16 +24,16 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
 
     const errorData = generateErrorData(iterations);
     const colors = {
-      tooltipBackground: isDarkTheme ? 'rgba(15, 23, 42, 0.96)' : 'rgba(255, 255, 255, 0.95)',
-      tooltipBorder: isDarkTheme ? '#334155' : '#e2e8f0',
-      tooltipText: isDarkTheme ? '#e2e8f0' : '#334155',
-      mutedText: isDarkTheme ? '#cbd5e1' : '#64748b',
-      axisLine: isDarkTheme ? '#64748b' : '#94a3b8',
-      axisTick: isDarkTheme ? '#475569' : '#cbd5e1',
-      splitLine: isDarkTheme ? '#334155' : '#e2e8f0',
-      line: isDarkTheme ? '#22c55e' : '#16a34a',
-      sliderFill: isDarkTheme ? 'rgba(34, 197, 94, 0.2)' : 'rgba(22, 163, 74, 0.15)',
-      sliderArea: isDarkTheme ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7',
+      tooltipBackground: chart.tooltipBg,
+      tooltipBorder: chart.grid,
+      tooltipText: chart.text,
+      mutedText: chart.label,
+      axisLine: chart.axis,
+      axisTick: chart.axis,
+      splitLine: chart.grid,
+      line: chart.series,
+      sliderFill: chart.seriesSoft,
+      sliderArea: chart.seriesSoft,
     };
     
     // Convertir a formato ECharts [iteración, logError]
@@ -77,7 +76,7 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
           borderWidth: 1,
           textStyle: {
             color: colors.tooltipText,
-            fontFamily: 'Google Sans Mono, monospace',
+            fontFamily: 'Google Sans Code, monospace',
             fontSize: 12
         },
         formatter: (params: unknown) => {
@@ -92,7 +91,7 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
           const actualError = Math.pow(10, logError);
           
           return `
-            <div style="font-family: 'Google Sans Mono', monospace;">
+            <div style="font-family: 'Google Sans Code', monospace;">
                 <div style="color: ${colors.mutedText}; margin-bottom: 4px;">Iteración ${iteration}</div>
                 <div style="color: ${colors.line}; font-weight: 600;">log₁₀(error) = ${logError.toFixed(4)}</div>
                 <div style="color: ${colors.mutedText}; font-size: 11px; margin-top: 4px;">Error ≈ ${actualError.toExponential(3)}</div>
@@ -129,7 +128,7 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
         axisLine: { lineStyle: { color: colors.axisLine } },
         axisTick: { lineStyle: { color: colors.axisTick } },
         axisLabel: {
-          fontFamily: 'Google Sans Mono, monospace',
+          fontFamily: 'Google Sans Code, monospace',
           fontSize: 11,
           color: colors.mutedText,
           formatter: (v: number) => Math.round(v).toString()
@@ -152,7 +151,7 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
         axisLine: { lineStyle: { color: colors.axisLine } },
         axisTick: { lineStyle: { color: colors.axisTick } },
         axisLabel: {
-          fontFamily: 'Google Sans Mono, monospace',
+          fontFamily: 'Google Sans Code, monospace',
           fontSize: 11,
           color: colors.mutedText,
           formatter: (v: number) => v.toFixed(1)
@@ -191,7 +190,7 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
             borderColor: colors.line
           },
           textStyle: {
-            fontFamily: 'Google Sans Mono, monospace',
+            fontFamily: 'Google Sans Code, monospace',
             fontSize: 10,
             color: colors.mutedText
           },
@@ -221,8 +220,8 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: isDarkTheme ? 'rgba(34, 197, 94, 0.35)' : 'rgba(22, 163, 74, 0.3)' },
-                { offset: 1, color: isDarkTheme ? 'rgba(34, 197, 94, 0.08)' : 'rgba(22, 163, 74, 0.05)' }
+                { offset: 0, color: chart.seriesSoft },
+                { offset: 1, color: chart.seriesFaint }
               ]
             }
           },
@@ -230,35 +229,33 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
           symbolSize: 10,
           itemStyle: {
             color: colors.line,
-            borderColor: '#ffffff',
+            borderColor: chart.surface,
             borderWidth: 2
           },
           emphasis: {
             itemStyle: {
               color: colors.line,
-              borderColor: '#ffffff',
+              borderColor: chart.surface,
               borderWidth: 3,
               shadowBlur: 10,
-              shadowColor: isDarkTheme
-                ? 'rgba(34, 197, 94, 0.5)'
-                : 'rgba(22, 163, 74, 0.5)'
+              shadowColor: chart.seriesSoft
             }
           }
         }
       ]
     };
-  }, [iterations, isDarkTheme, isMobile]);
+  }, [iterations, chart, isMobile]);
 
   if (iterations.length === 0) {
     return (
-      <Card className="border-border">
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
             Convergencia
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent>
           <div className="h-40 sm:h-64 flex items-center justify-center text-muted-foreground text-sm sm:text-base">
             Ejecuta el cálculo para ver la convergencia
           </div>
@@ -268,9 +265,9 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
   }
 
   return (
-    <Card className="border-border overflow-hidden">
-      <CardHeader className="pb-2 p-4 sm:p-6 sm:pb-2">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+    <Card className="overflow-hidden">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
           <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
           Convergencia
         </CardTitle>
@@ -278,12 +275,12 @@ export function ConvergencePlot({ iterations }: ConvergencePlotProps) {
           Error en escala logarítmica por iteración
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-1 sm:p-2 bg-muted/10">
+      <CardContent>
         <ReactECharts
           ref={chartRef}
           option={chartOption}
           style={{ height: isMobile ? '250px' : '320px', width: '100%' }}
-          opts={{ renderer: 'canvas' }}
+          opts={{ renderer: 'svg' }}
           notMerge={true}
         />
         

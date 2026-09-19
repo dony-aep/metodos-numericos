@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
   LineChart as LineChartIcon,
@@ -28,6 +27,7 @@ import {
 } from '@/components/ui/table';
 import type { LeastSquaresResult } from '@/types/least-squares';
 import type { DataPoint } from '@/types/interpolation';
+import { useChartTheme } from '@/lib/chartTheme';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -44,8 +44,7 @@ function FitPlot({
   result: LeastSquaresResult;
   points: DataPoint[];
 }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -59,12 +58,10 @@ function FitPlot({
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
         textStyle: {
-          color: isDark ? '#e2e8f0' : '#334155',
+          color: chart.text,
           fontSize: 12,
         },
       },
@@ -74,32 +71,32 @@ function FitPlot({
       xAxis: {
         type: 'value',
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
       yAxis: {
         type: 'value',
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -111,7 +108,7 @@ function FitPlot({
           smooth: false,
           showSymbol: false,
           lineStyle: {
-            color: isDark ? '#a1a1aa' : '#71717a',
+            color: chart.series,
             width: 2,
           },
         },
@@ -121,60 +118,55 @@ function FitPlot({
           data: pointData,
           symbolSize: 10,
           itemStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
-            borderColor: isDark ? '#fafafa' : '#18181b',
+            color: chart.neutralSeries,
+            borderColor: chart.text,
             borderWidth: 2,
           },
         },
       ],
     };
-  }, [result, points, isDark, isMobile]);
+  }, [result, points, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <LineChartIcon className="h-4 w-4 text-muted-foreground" />
           Gráfica de ajuste
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 260 : 350 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function LeastSquaresResults({
-  result,
-  points,
-}: {
-  result: LeastSquaresResult;
-  points: DataPoint[];
-}) {
+export function LeastSquaresReadout({ result }: { result: LeastSquaresResult }) {
   const rSquaredGood = result.rSquared >= 0.95;
   const rSquaredOk = result.rSquared >= 0.8;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Diagnóstico */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Badge
-            className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+            className="text-xs text-emerald-700 dark:text-emerald-300"
             variant="outline"
           >
             Grado {result.degree}
@@ -186,10 +178,10 @@ export function LeastSquaresResults({
             className={cn(
               'text-xs',
               rSquaredGood
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300'
+                ? '  text-emerald-700   dark:text-emerald-300'
                 : rSquaredOk
-                  ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300'
-                  : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300'
+                  ? '  text-amber-700   dark:text-amber-300'
+                  : '  text-red-700   dark:text-red-300'
             )}
             variant="outline"
           >
@@ -200,14 +192,10 @@ export function LeastSquaresResults({
           </Badge>
         </CardContent>
       </Card>
-
-      {/* Gráfica */}
-      <FitPlot result={result} points={points} />
-
       {/* Coeficientes */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Hash className="h-4 w-4 text-muted-foreground" />
             Coeficientes del polinomio
           </CardTitle>
@@ -239,7 +227,7 @@ export function LeastSquaresResults({
             {result.coefficients.map((coef, k) => (
               <div
                 key={`coef-${k}`}
-                className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2"
+                className="flex items-center justify-between border-b border-rule py-2.5"
               >
                 <span className="text-xs text-muted-foreground">
                   <InlineMath math={`a_{${k}}`} />
@@ -252,11 +240,25 @@ export function LeastSquaresResults({
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+export function LeastSquaresPlots({
+  result,
+  points,
+}: {
+  result: LeastSquaresResult;
+  points: DataPoint[];
+}) {
+  return (
+    <div className="grid gap-8 xl:grid-cols-2">
+      {/* Gráfica */}
+      <FitPlot result={result} points={points} />
       {/* Residuos */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
             Residuos
             <Badge
@@ -267,27 +269,27 @@ export function LeastSquaresResults({
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     i
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     x<sub>i</sub>
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     y<sub>i</sub>
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     f(x<sub>i</sub>)
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     e<sub>i</sub>
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     e<sub>i</sub>²
                   </TableHead>
                 </TableRow>

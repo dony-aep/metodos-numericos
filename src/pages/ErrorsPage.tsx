@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { ErrorsHeader } from '@/components/topics/errores/Header';
 import { ErrorsResults } from '@/components/topics/errores/ErrorsResults';
 import { ErrorsTheory } from '@/components/topics/errores/ErrorsTheory';
 import { Button } from '@/components/ui/button';
@@ -68,15 +67,22 @@ export default function ErrorsPage() {
     }
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!errorsResult && !taylorResult) return undefined;
     const message = errorsResult?.message ?? taylorResult?.message ?? '';
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={message} />
-        <ErrorsResults errorsResult={errorsResult} taylorResult={taylorResult} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: <MethodResultBanner variant="success" message={message} />,
+      },
+      {
+        label: 'Resultados',
+        note: 'El error de truncamiento baja al sumar términos, hasta que el redondeo lo frena.',
+        content: (
+          <ErrorsResults errorsResult={errorsResult} taylorResult={taylorResult} />
+        ),
+      },
+    ];
   }, [errorsResult, taylorResult]);
 
   const emptyState =
@@ -88,16 +94,8 @@ export default function ErrorsPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <ErrorsHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Errores y Aproximaciones',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="errores-aproximaciones"
         inputSection={
           <div className="space-y-4">
             {/* Mode selector */}
@@ -108,7 +106,7 @@ export default function ErrorsPage() {
               </TabsList>
 
               <TabsContent value="errors" className="mt-4 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Valor exacto (x)</label>
                     <Input value={exactStr} onChange={(e) => setExactStr(e.target.value)} placeholder="Ej: 1.41421356" className="font-mono" inputMode="decimal" />
@@ -133,7 +131,7 @@ export default function ErrorsPage() {
                   <Input value={expression} onChange={(e) => setExpression(e.target.value)} placeholder="Ej: exp(x), sin(x)" className="font-mono" />
                   <p className="text-xs text-muted-foreground">Soporta: ^ potencia, sin/cos/tan, exp, log (ln), sqrt, abs</p>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Punto a (centro)</label>
                     <Input value={aStr} onChange={(e) => setAStr(e.target.value)} placeholder="0" className="font-mono" inputMode="decimal" />
@@ -174,10 +172,9 @@ export default function ErrorsPage() {
             {status === 'error' && error && <p className="text-sm text-destructive">{error}</p>}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<ErrorsTheory />}
       />
-    </div>
   );
 }

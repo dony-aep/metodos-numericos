@@ -1,82 +1,114 @@
 import type { ReactNode } from 'react';
-import { BookOpen, Calculator } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { MethodTemplateLabels } from '@/types/method-module';
+import { BlockMath } from '@/components/shared/MathRenderer';
+import {
+  MethodFactSheet,
+  MethodPitfallNote,
+} from '@/components/shared/MethodFactSheet';
+import { MarginGrid, MarginSection } from '@/components/shared/MarginLayout';
+import { getFamily } from '@/data/families';
+import { getMethodBySlug } from '@/data/methods';
 
-interface MethodModuleLayoutProps {
-  labels?: Partial<MethodTemplateLabels>;
-  calculatorIcon?: ReactNode;
-  theoryIcon?: ReactNode;
-  inputSection: ReactNode;
-  resultsSection?: ReactNode;
-  emptyState?: ReactNode;
-  theorySection: ReactNode;
-  defaultTab?: 'calculator' | 'theory';
+export interface MethodSection {
+  label: string;
+  note?: string;
+  content: ReactNode;
 }
 
-const DEFAULT_LABELS: MethodTemplateLabels = {
-  calculatorTab: 'Calculadora',
-  theoryTab: 'Teoría',
-  inputSectionTitle: 'Parámetros de Entrada',
-};
+interface MethodModuleLayoutProps {
+  slug: string;
+  /** Rótulo de la sección de entrada en el margen. */
+  inputTitle?: string;
+  inputSection: ReactNode;
+  /** Resultados divididos, cada parte con su rótulo en el margen. */
+  resultSections?: MethodSection[];
+  emptyState?: ReactNode;
+  theorySection: ReactNode;
+  /**
+   * Carga en la calculadora los parámetros con los que el método falla. Los
+   * módulos que lo pasan muestran el botón; los demás solo describen el caso.
+   */
+  onLoadPitfall?: (example: Record<string, string>) => void;
+}
 
+/**
+ * Cada método se compone sobre la rejilla del cuaderno: el margen nombra lo
+ * que hay a su derecha y los filetes separan las secciones de arriba abajo.
+ */
 export function MethodModuleLayout({
-  labels,
-  calculatorIcon,
-  theoryIcon,
+  slug,
+  inputTitle = 'Parámetros',
   inputSection,
-  resultsSection,
+  resultSections,
   emptyState,
   theorySection,
-  defaultTab = 'calculator',
+  onLoadPitfall,
 }: MethodModuleLayoutProps) {
-  const mergedLabels: MethodTemplateLabels = {
-    ...DEFAULT_LABELS,
-    ...labels,
-  };
+  const method = getMethodBySlug(slug);
+  if (!method) throw new Error(`Método desconocido: ${slug}`);
+  const family = getFamily(method.family);
+
+  const sections = resultSections ?? [];
 
   return (
-    <section className="space-y-4 sm:space-y-6">
-      <Tabs defaultValue={defaultTab} className="space-y-4 sm:space-y-6">
-        <TabsList className="mx-auto grid h-10 w-full max-w-xs grid-cols-2 sm:h-11 sm:max-w-md">
-          <TabsTrigger
-            value="calculator"
-            className="gap-1.5 text-xs sm:gap-2 sm:text-sm"
-          >
-            {calculatorIcon ?? <Calculator className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            {mergedLabels.calculatorTab}
-          </TabsTrigger>
-          <TabsTrigger
-            value="theory"
-            className="gap-1.5 text-xs sm:gap-2 sm:text-sm"
-          >
-            {theoryIcon ?? <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-            {mergedLabels.theoryTab}
-          </TabsTrigger>
-        </TabsList>
+    <MarginGrid>
+      <MarginSection label={method.title}>
+        <div className="flex flex-col gap-8 2xl:flex-row 2xl:items-start 2xl:justify-between 2xl:gap-12">
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">{family.label}</p>
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              {method.description}
+            </p>
+          </div>
 
-        <TabsContent value="calculator" className="space-y-4 sm:space-y-6">
-          <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                {calculatorIcon ?? (
-                  <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />
-                )}
-                {mergedLabels.inputSectionTitle}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4 pt-0 sm:space-y-6 sm:p-6 sm:pt-0">
-              {inputSection}
-            </CardContent>
-          </Card>
+          <div className="flex min-w-0 flex-wrap gap-x-10 gap-y-6">
+            {method.formulas.map((formula) => (
+              <figure key={formula.caption} className="min-w-0 max-w-full">
+                {/* El desplazamiento lo lleva ya BlockMath; envolverlo en otro
+                    contenedor con overflow dejaba dos píxeles de barra fantasma. */}
+                <BlockMath math={formula.latex} className="text-[15px]" />
+                <figcaption className="mt-2 text-xs text-muted-foreground">
+                  {formula.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </MarginSection>
 
-          {resultsSection}
-          {emptyState}
-        </TabsContent>
+      <MarginSection label="Ficha">
+        <MethodFactSheet facts={method.facts} />
+      </MarginSection>
 
-        <TabsContent value="theory">{theorySection}</TabsContent>
-      </Tabs>
-    </section>
+      <MarginSection
+        label="Cuándo falla"
+        note="Lo que un método no puede hacer explica mejor para qué sirve que cualquier lista de ventajas."
+      >
+        <MethodPitfallNote
+          pitfall={method.pitfall}
+          onLoadExample={onLoadPitfall}
+        />
+      </MarginSection>
+
+      <MarginSection label={inputTitle} contentClassName="@container">
+        {inputSection}
+      </MarginSection>
+
+      {sections.map((section) => (
+        <MarginSection
+          key={section.label}
+          label={section.label}
+          note={section.note}
+          sticky
+        >
+          {section.content}
+        </MarginSection>
+      ))}
+
+      {emptyState && <MarginSection>{emptyState}</MarginSection>}
+
+      <MarginSection label="Teoría" sticky divider={false}>
+        {theorySection}
+      </MarginSection>
+    </MarginGrid>
   );
 }

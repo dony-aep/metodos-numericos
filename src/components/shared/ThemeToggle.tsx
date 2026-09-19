@@ -2,39 +2,40 @@ import { LaptopMinimal, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 
+const ORDER = ['light', 'dark', 'system'] as const;
+
+const LABELS: Record<(typeof ORDER)[number], string> = {
+  light: 'Tema claro',
+  dark: 'Tema oscuro',
+  system: 'Tema del sistema',
+};
+
+const ICONS = {
+  light: Sun,
+  dark: Moon,
+  system: LaptopMinimal,
+};
+
+/**
+ * Un solo botón que rota entre los tres temas. Tres botones en fila no caben
+ * en la barra a 375px y, salvo para elegir, tampoco aportan nada.
+ */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const activeTheme = theme ?? 'system';
+  const active = (ORDER.find((option) => option === theme) ?? 'system') as
+    (typeof ORDER)[number];
+  const next = ORDER[(ORDER.indexOf(active) + 1) % ORDER.length];
+  const Icon = ICONS[active];
 
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-border bg-background p-1">
-      <Button
-        size="icon-sm"
-        variant={activeTheme === 'light' ? 'secondary' : 'ghost'}
-        onClick={() => setTheme('light')}
-        className={activeTheme === 'light' ? 'text-foreground' : 'text-muted-foreground'}
-        aria-label="Tema claro"
-      >
-        <Sun className="h-4 w-4" />
-      </Button>
-      <Button
-        size="icon-sm"
-        variant={activeTheme === 'dark' ? 'secondary' : 'ghost'}
-        onClick={() => setTheme('dark')}
-        className={activeTheme === 'dark' ? 'text-foreground' : 'text-muted-foreground'}
-        aria-label="Tema oscuro"
-      >
-        <Moon className="h-4 w-4" />
-      </Button>
-      <Button
-        size="icon-sm"
-        variant={activeTheme === 'system' ? 'secondary' : 'ghost'}
-        onClick={() => setTheme('system')}
-        className={activeTheme === 'system' ? 'text-foreground' : 'text-muted-foreground'}
-        aria-label="Tema del sistema"
-      >
-        <LaptopMinimal className="h-4 w-4" />
-      </Button>
-    </div>
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={() => setTheme(next)}
+      className="text-muted-foreground hover:text-foreground"
+      aria-label={`${LABELS[active]}. Cambiar a: ${LABELS[next].toLowerCase()}`}
+    >
+      <Icon className="h-4 w-4" />
+    </Button>
   );
 }

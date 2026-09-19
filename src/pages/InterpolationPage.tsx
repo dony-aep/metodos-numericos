@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { InterpolationHeader } from '@/components/topics/interpolacion/Header';
 import { InterpolationInputGrid } from '@/components/topics/interpolacion/InterpolationInputGrid';
-import { InterpolationResults } from '@/components/topics/interpolacion/InterpolationResults';
+import {
+  InterpolationReadout,
+  InterpolationPlots,
+  InterpolationTables,
+} from '@/components/topics/interpolacion/InterpolationResults';
 import { InterpolationTheory } from '@/components/topics/interpolacion/InterpolationTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,15 +110,29 @@ export default function InterpolationPage() {
       .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
   }, [xValues, yValues]);
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={result.message} />
-        <InterpolationResults result={result} points={parsedPoints} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant="success" message={result.message} />
+              <InterpolationReadout result={result} points={parsedPoints} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'El polinomio pasa exactamente por cada punto dado.',
+        content: <InterpolationPlots result={result} points={parsedPoints} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'La tabla triangular de diferencias divididas.',
+        content: <InterpolationTables result={result} points={parsedPoints} />,
+      },
+    ];
   }, [result, parsedPoints]);
 
   const emptyState =
@@ -127,16 +144,8 @@ export default function InterpolationPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <InterpolationHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Interpolación Polinómica',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="interpolacion-polinomica"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -165,9 +174,9 @@ export default function InterpolationPage() {
             />
 
             {/* Evaluar en un punto */}
-            <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-muted/20 p-3">
+            <div className="flex flex-wrap items-end gap-4 border-y border-rule py-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <label className="text-xs font-medium text-muted-foreground">
                   Evaluar P(x) en
                 </label>
                 <Input
@@ -212,10 +221,9 @@ export default function InterpolationPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<InterpolationTheory />}
       />
-    </div>
   );
 }

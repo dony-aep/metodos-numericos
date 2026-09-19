@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle, TableIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ErrorBar } from '@/components/shared/ErrorBar';
 
 interface IterationTableProps {
   iterations: SecantIteration[];
@@ -19,9 +20,9 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="border-b border-border p-4 sm:p-5">
+      <CardHeader className="border-b border-rule pb-3">
         <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <TableIcon className="w-3.5 h-3.5" />
             Tabla de Iteraciones
           </span>
@@ -30,7 +31,7 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent>
         {/* Vista móvil: filas compactas */}
         <div className="sm:hidden divide-y divide-border">
           {iterations.map((iter, idx) => {
@@ -41,7 +42,7 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
                 className={cn(
                   'px-4 py-3 transition-colors',
                   isLast
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30'
+                    ? ' '
                     : 'hover:bg-muted/20'
                 )}
               >
@@ -54,11 +55,11 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
                     className={cn(
                       'font-mono text-[10px]',
                       iter.error < 1e-4
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
+                        ? ' text-emerald-700   dark:text-emerald-400 '
                         : 'text-muted-foreground'
                     )}
                   >
-                    ε = {formatScientific(iter.error)}
+                    ε = <ErrorBar error={iter.error} />
                   </Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -80,7 +81,7 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
         <div className="hidden sm:block overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/20 hover:bg-muted/20">
+              <TableRow>
                 <TableHead className="font-mono text-xs text-muted-foreground w-12">n</TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">x<sub>n−1</sub></TableHead>
                 <TableHead className="font-mono text-xs text-muted-foreground">x<sub>n</sub></TableHead>
@@ -99,7 +100,7 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
                     className={cn(
                       'transition-colors',
                       isLast
-                        ? 'bg-emerald-50 dark:bg-emerald-950/25 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/40'
+                        ? '  hover: dark:hover:'
                         : 'hover:bg-muted/20'
                     )}
                   >
@@ -125,11 +126,11 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
                         className={cn(
                           'font-mono text-[11px] tabular-nums',
                           iter.error < 1e-4
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
+                            ? ' text-emerald-700   dark:text-emerald-400 '
                             : 'text-muted-foreground'
                         )}
                       >
-                        {formatScientific(iter.error)}
+                        <ErrorBar error={iter.error} />
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -144,8 +145,8 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
           <div className={cn(
             'mx-4 my-4 flex items-center gap-4 rounded-lg px-5 py-4 border',
             converged
-              ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800'
-              : 'bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800'
+              ? '   '
+              : '   '
           )}>
             {converged ? (
               <CheckCircle2 className="w-7 h-7 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -154,7 +155,7 @@ export function IterationTable({ iterations, root, converged }: IterationTablePr
             )}
             <div>
               <p className={cn(
-                'text-[10px] font-semibold uppercase tracking-widest',
+                'text-xs font-medium',
                 converged
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : 'text-amber-600 dark:text-amber-400'

@@ -22,7 +22,7 @@ export function InterpolationInputGrid({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="text-xs font-medium text-muted-foreground">
           Puntos de datos ({xValues.length})
         </p>
         <Button
@@ -40,10 +40,10 @@ export function InterpolationInputGrid({
       <div className="space-y-2">
         {/* Header labels */}
         <div className="grid grid-cols-[1fr_1fr_2rem] items-center gap-2 px-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             x
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             y
           </span>
           <span />

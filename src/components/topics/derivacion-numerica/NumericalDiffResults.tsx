@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import {
   CheckCircle2,
   TrendingDown,
@@ -27,6 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { NumericalDiffResult } from '@/types/numerical-diff';
+import { useChartTheme } from '@/lib/chartTheme';
 
 function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '—';
@@ -46,8 +46,7 @@ function ConvergencePlot({
 }: {
   result: NumericalDiffResult;
 }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -66,12 +65,10 @@ function ConvergencePlot({
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
         textStyle: {
-          color: isDark ? '#e2e8f0' : '#334155',
+          color: chart.text,
           fontSize: 12,
         },
         formatter: (params: unknown) => {
@@ -87,7 +84,7 @@ function ConvergencePlot({
       },
       legend: {
         top: 0,
-        textStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        textStyle: { color: chart.label, fontSize: 11 },
       },
       grid: isMobile
         ? { top: 25, right: 10, bottom: 30, left: 40 }
@@ -97,36 +94,36 @@ function ConvergencePlot({
         name: 'log₁₀(h)',
         nameLocation: 'center',
         nameGap: 25,
-        nameTextStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        nameTextStyle: { color: chart.label, fontSize: 11 },
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
       yAxis: {
         type: 'value',
-        name: "f'(x)",
-        nameTextStyle: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        name:"f'(x)",
+        nameTextStyle: { color: chart.label, fontSize: 11 },
         axisLine: {
-          lineStyle: { color: isDark ? '#64748b' : '#94a3b8' },
+          lineStyle: { color: chart.axis },
         },
         splitLine: {
           lineStyle: {
-            color: isDark ? '#334155' : '#e2e8f0',
+            color: chart.grid,
             type: 'dashed',
           },
         },
         axisLabel: {
-          color: isDark ? '#cbd5e1' : '#64748b',
+          color: chart.label,
           fontSize: 11,
         },
       },
@@ -136,8 +133,8 @@ function ConvergencePlot({
           type: 'line',
           data: fwdData,
           symbolSize: 6,
-          lineStyle: { color: isDark ? '#a1a1aa' : '#71717a', width: 2 },
-          itemStyle: { color: isDark ? '#a1a1aa' : '#71717a' },
+          lineStyle: { color: chart.series, width: 2 },
+          itemStyle: { color: chart.series },
         },
         {
           name: 'Atrás',
@@ -145,11 +142,11 @@ function ConvergencePlot({
           data: bwdData,
           symbolSize: 6,
           lineStyle: {
-            color: isDark ? '#a1a1aa' : '#71717a',
+            color: chart.palette[1],
             width: 2,
             type: 'dashed',
           },
-          itemStyle: { color: isDark ? '#a1a1aa' : '#71717a' },
+          itemStyle: { color: chart.palette[1] },
         },
         {
           name: 'Centrada',
@@ -157,61 +154,58 @@ function ConvergencePlot({
           data: ctrData,
           symbolSize: 6,
           lineStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
+            color: chart.palette[2],
             width: 2.5,
+            type: 'dotted',
           },
           itemStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
-            borderColor: isDark ? '#fafafa' : '#18181b',
+            color: chart.palette[2],
+            borderColor: chart.text,
             borderWidth: 2,
           },
         },
       ],
     };
-  }, [result, isDark, isMobile]);
+  }, [result, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <TrendingDown className="h-4 w-4 text-muted-foreground" />
           Convergencia al refinar h
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 250 : 320 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function NumericalDiffResults({
+export function NumericalDiffReadout({
   result,
 }: {
   result: NumericalDiffResult;
 }) {
-  const hasErrors = result.approximations.some((a) => a.error !== null);
-
-  const firstDerivApprox = result.approximations.filter(
-    (a) => a.method !== 'second-centered'
-  );
   const secondDerivApprox = result.approximations.filter(
     (a) => a.method === 'second-centered'
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Resumen */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
@@ -228,31 +222,88 @@ export function NumericalDiffResults({
           </Badge>
         </CardContent>
       </Card>
+      {/* Segunda derivada */}
+      {secondDerivApprox.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              Segunda derivada — <InlineMath math="f''(x)" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {secondDerivApprox.map((a) => (
+                <div
+                  key={a.method}
+                  className="flex items-center justify-between border-b border-rule py-2.5"
+                >
+                  <div>
+                    <p className="text-sm font-medium">{a.label}</p>
+                    <p className="text-xs text-muted-foreground">{a.order}</p>
+                  </div>
+                  <span className="font-mono text-sm tabular-nums font-medium">
+                    {formatNumber(a.value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
 
+export function NumericalDiffPlots({
+  result,
+}: {
+  result: NumericalDiffResult;
+}) {
+  return (
+    <div>
+      {/* Gráfica de convergencia */}
+      <ConvergencePlot result={result} />
+    </div>
+  );
+}
+
+export function NumericalDiffTables({
+  result,
+}: {
+  result: NumericalDiffResult;
+}) {
+  const hasErrors = result.approximations.some((a) => a.error !== null);
+  const firstDerivApprox = result.approximations.filter(
+    (a) => a.method !== 'second-centered'
+  );
+
+  return (
+    <div className="space-y-10">
       {/* Primera derivada */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-muted-foreground" />
             Primera derivada — <InlineMath math="f'(x)" />
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     Método
                   </TableHead>
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead>
                     Orden
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Valor
                   </TableHead>
                   {hasErrors && (
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                    <TableHead className="text-right">
                       |Error|
                     </TableHead>
                   )}
@@ -287,44 +338,10 @@ export function NumericalDiffResults({
           </div>
         </CardContent>
       </Card>
-
-      {/* Segunda derivada */}
-      {secondDerivApprox.length > 0 && (
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Activity className="h-4 w-4 text-muted-foreground" />
-              Segunda derivada — <InlineMath math="f''(x)" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {secondDerivApprox.map((a) => (
-                <div
-                  key={a.method}
-                  className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{a.label}</p>
-                    <p className="text-xs text-muted-foreground">{a.order}</p>
-                  </div>
-                  <span className="font-mono text-sm tabular-nums font-medium">
-                    {formatNumber(a.value)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Gráfica de convergencia */}
-      <ConvergencePlot result={result} />
-
       {/* Tabla de convergencia */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Table2 className="h-4 w-4 text-muted-foreground" />
             Estudio de convergencia
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -332,21 +349,21 @@ export function NumericalDiffResults({
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     h
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Adelante
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Atrás
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Centrada
                   </TableHead>
                 </TableRow>

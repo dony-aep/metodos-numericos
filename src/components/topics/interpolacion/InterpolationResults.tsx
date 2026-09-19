@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
-import { useTheme } from 'next-themes';
 import { CheckCircle2, Grid3X3, LineChart as LineChartIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useResponsive';
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/table';
 import type { InterpolationResult } from '@/types/interpolation';
 import type { DataPoint } from '@/types/interpolation';
+import { useChartTheme } from '@/lib/chartTheme';
 
 interface InterpolationResultsProps {
   result: InterpolationResult;
@@ -43,8 +43,7 @@ function InterpolationPlot({
   result: InterpolationResult;
   points: DataPoint[];
 }) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const chart = useChartTheme();
   const isMobile = useIsMobile();
 
   const option = useMemo((): EChartsOption => {
@@ -64,30 +63,28 @@ function InterpolationPlot({
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'item',
-        backgroundColor: isDark
-          ? 'rgba(15,23,42,0.96)'
-          : 'rgba(255,255,255,0.95)',
-        borderColor: isDark ? '#334155' : '#e2e8f0',
-        textStyle: { color: isDark ? '#e2e8f0' : '#334155', fontSize: 12 },
+        backgroundColor: chart.tooltipBg,
+        borderColor: chart.grid,
+        textStyle: { color: chart.text, fontSize: 12 },
       },
       grid: isMobile
         ? { top: 30, right: 10, bottom: 30, left: 35 }
         : { top: 40, right: 20, bottom: 40, left: 50 },
       xAxis: {
         type: 'value',
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
+        axisLine: { lineStyle: { color: chart.axis } },
         splitLine: {
-          lineStyle: { color: isDark ? '#334155' : '#e2e8f0', type: 'dashed' },
+          lineStyle: { color: chart.grid, type: 'dashed' },
         },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        axisLabel: { color: chart.label, fontSize: 11 },
       },
       yAxis: {
         type: 'value',
-        axisLine: { lineStyle: { color: isDark ? '#64748b' : '#94a3b8' } },
+        axisLine: { lineStyle: { color: chart.axis } },
         splitLine: {
-          lineStyle: { color: isDark ? '#334155' : '#e2e8f0', type: 'dashed' },
+          lineStyle: { color: chart.grid, type: 'dashed' },
         },
-        axisLabel: { color: isDark ? '#cbd5e1' : '#64748b', fontSize: 11 },
+        axisLabel: { color: chart.label, fontSize: 11 },
       },
       series: [
         {
@@ -97,7 +94,7 @@ function InterpolationPlot({
           smooth: false,
           showSymbol: false,
           lineStyle: {
-            color: isDark ? '#a1a1aa' : '#71717a',
+            color: chart.series,
             width: 2,
           },
         },
@@ -107,8 +104,8 @@ function InterpolationPlot({
           data: pointData,
           symbolSize: 10,
           itemStyle: {
-            color: isDark ? '#e4e4e7' : '#3f3f46',
-            borderColor: isDark ? '#fafafa' : '#18181b',
+            color: chart.neutralSeries,
+            borderColor: chart.text,
             borderWidth: 2,
           },
         },
@@ -121,8 +118,8 @@ function InterpolationPlot({
                 symbolSize: 14,
                 symbol: 'diamond',
                 itemStyle: {
-                  color: isDark ? '#34d399' : '#10b981',
-                  borderColor: isDark ? '#6ee7b7' : '#059669',
+                  color: chart.palette[2],
+                  borderColor: chart.palette[2],
                   borderWidth: 2,
                 },
               },
@@ -130,49 +127,48 @@ function InterpolationPlot({
           : []),
       ],
     };
-  }, [result, points, isDark, isMobile]);
+  }, [result, points, chart, isMobile]);
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <LineChartIcon className="h-4 w-4 text-muted-foreground" />
           Gráfica del polinomio interpolante
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg bg-muted/10 p-2">
+        <div>
           <ReactECharts
             option={option}
             style={{ height: isMobile ? 260 : 350 }}
             notMerge
             lazyUpdate
-          />
+          opts={{ renderer: 'svg' }}
+        />
         </div>
       </CardContent>
     </Card>
   );
 }
 
-export function InterpolationResults({
+export function InterpolationReadout({
   result,
   points,
 }: InterpolationResultsProps) {
-  const { dividedDifferences: dd } = result;
-
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Diagnóstico */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             Resultado
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Badge
-            className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+            className="text-xs text-emerald-700 dark:text-emerald-300"
             variant="outline"
           >
             Grado {result.n}
@@ -182,7 +178,7 @@ export function InterpolationResults({
           </Badge>
           {result.evaluateAt !== null && result.evaluatedValue !== null ? (
             <Badge
-              className="border-emerald-200 bg-emerald-50 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+              className="text-xs text-emerald-700 dark:text-emerald-300"
               variant="outline"
             >
               P({formatNumber(result.evaluateAt)}) = {formatNumber(result.evaluatedValue)}
@@ -190,14 +186,34 @@ export function InterpolationResults({
           ) : null}
         </CardContent>
       </Card>
+    </div>
+  );
+}
 
+export function InterpolationPlots({
+  result,
+  points,
+}: InterpolationResultsProps) {
+  return (
+    <div>
       {/* Gráfica */}
       <InterpolationPlot result={result} points={points} />
+    </div>
+  );
+}
 
+export function InterpolationTables({
+  result,
+  points,
+}: InterpolationResultsProps) {
+  const { dividedDifferences: dd } = result;
+
+  return (
+    <div className="space-y-10">
       {/* Tabla de diferencias divididas */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Grid3X3 className="h-4 w-4 text-muted-foreground" />
             Tabla de diferencias divididas
             <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -205,22 +221,22 @@ export function InterpolationResults({
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     i
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     x<sub>i</sub>
                   </TableHead>
                   {Array.from({ length: dd.coefficients.length }).map(
                     (_, col) => (
                       <TableHead
                         key={`dd-head-${col}`}
-                        className="text-right text-[10px] font-semibold uppercase tracking-wider"
+                        className="text-right"
                       >
                         {col === 0 ? (
                           <>f[x<sub>i</sub>]</>
@@ -268,23 +284,22 @@ export function InterpolationResults({
           </div>
         </CardContent>
       </Card>
-
       {/* Coeficientes de Newton */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-0">
           <CardTitle className="text-base text-muted-foreground">
             Coeficientes del polinomio de Newton
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/20 hover:bg-muted/20">
-                  <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableRow>
+                  <TableHead>
                     Término
                   </TableHead>
-                  <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                  <TableHead className="text-right">
                     Coeficiente
                   </TableHead>
                 </TableRow>

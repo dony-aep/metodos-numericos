@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { NumericalDiffHeader } from '@/components/topics/derivacion-numerica/Header';
-import { NumericalDiffResults } from '@/components/topics/derivacion-numerica/NumericalDiffResults';
+import {
+  NumericalDiffReadout,
+  NumericalDiffPlots,
+  NumericalDiffTables,
+} from '@/components/topics/derivacion-numerica/NumericalDiffResults';
 import { NumericalDiffTheory } from '@/components/topics/derivacion-numerica/NumericalDiffTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +20,7 @@ const EXAMPLE_SETS = [
     x: '2',
     h: '0.1',
     exact: '4',
-    desc: "f'(2) = 4",
+    desc:"f'(2) = 4",
   },
   {
     label: 'sin(x)',
@@ -25,7 +28,7 @@ const EXAMPLE_SETS = [
     x: '1',
     h: '0.01',
     exact: String(Math.cos(1)),
-    desc: "f'(1) = cos(1)",
+    desc:"f'(1) = cos(1)",
   },
   {
     label: 'eˣ',
@@ -33,7 +36,7 @@ const EXAMPLE_SETS = [
     x: '0',
     h: '0.1',
     exact: '1',
-    desc: "f'(0) = 1",
+    desc:"f'(0) = 1",
   },
   {
     label: 'ln(x)',
@@ -41,7 +44,7 @@ const EXAMPLE_SETS = [
     x: '2',
     h: '0.01',
     exact: '0.5',
-    desc: "f'(2) = 0.5",
+    desc:"f'(2) = 0.5",
   },
 ];
 
@@ -101,14 +104,29 @@ export default function NumericalDiffPage() {
     calculate({ expression: expression.trim(), x, h, exactValue });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={result.message} />
-        <NumericalDiffResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant="success" message={result.message} />
+              <NumericalDiffReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'Al reducir h el error baja, hasta que la resta de números parecidos lo devuelve a subir.',
+        content: <NumericalDiffPlots result={result} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'Cada esquema con su error frente a la derivada exacta.',
+        content: <NumericalDiffTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -120,16 +138,8 @@ export default function NumericalDiffPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <NumericalDiffHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Derivación Numérica',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="derivacion-numerica"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -167,7 +177,7 @@ export default function NumericalDiffPage() {
             </div>
 
             {/* Punto x y paso h */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 @xs:grid-cols-2 @2xl:grid-cols-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
                   Punto x
@@ -240,10 +250,9 @@ export default function NumericalDiffPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<NumericalDiffTheory />}
       />
-    </div>
   );
 }

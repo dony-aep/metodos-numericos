@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { IterativeMethodsHeader } from '@/components/topics/jacobi-gauss-seidel/Header';
-import { IterativeMethodResults } from '@/components/topics/jacobi-gauss-seidel/IterativeMethodResults';
+import {
+  IterativeMethodReadout,
+  IterativeMethodTables,
+} from '@/components/topics/jacobi-gauss-seidel/IterativeMethodResults';
 import { IterativeMethodsTheory } from '@/components/topics/jacobi-gauss-seidel/IterativeMethodsTheory';
 import { LinearSystemInputGrid } from '@/components/topics/sistemas-lineales/LinearSystemInputGrid';
 import { Button } from '@/components/ui/button';
@@ -143,18 +145,27 @@ export default function JacobiGaussSeidelPage() {
     calculate({ matrix, vector, method, tolerance: tol, maxIterations: maxIter });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner
-          variant={result.converged ? 'success' : 'warning'}
-          message={result.message}
-        />
-        <IterativeMethodResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner
+        variant={result.converged ? 'success' : 'warning'}
+        message={result.message}
+      />
+              <IterativeMethodReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Tablas',
+        note: 'La barra del error enseña si el método se acerca o se aleja.',
+        content: <IterativeMethodTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -166,16 +177,8 @@ export default function JacobiGaussSeidelPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <IterativeMethodsHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Métodos Iterativos (Ax = b)',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="jacobi-gauss-seidel"
         inputSection={
           <div className="space-y-4">
             {/* Selector de método */}
@@ -233,9 +236,9 @@ export default function JacobiGaussSeidelPage() {
             />
 
             {/* Parámetros iterativos */}
-            <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-muted/20 p-3">
+            <div className="flex flex-wrap items-end gap-4 border-y border-rule py-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <label className="text-xs font-medium text-muted-foreground">
                   Tolerancia
                 </label>
                 <Input
@@ -246,7 +249,7 @@ export default function JacobiGaussSeidelPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <label className="text-xs font-medium text-muted-foreground">
                   Máx. iteraciones
                 </label>
                 <Input
@@ -288,10 +291,9 @@ export default function JacobiGaussSeidelPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<IterativeMethodsTheory />}
       />
-    </div>
   );
 }

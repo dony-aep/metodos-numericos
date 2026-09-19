@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { LagrangeHeader } from '@/components/topics/lagrange/Header';
 import { InterpolationInputGrid } from '@/components/topics/interpolacion/InterpolationInputGrid';
-import { LagrangeResults } from '@/components/topics/lagrange/LagrangeResults';
+import {
+  LagrangeReadout,
+  LagrangePlots,
+  LagrangeTables,
+} from '@/components/topics/lagrange/LagrangeResults';
 import { LagrangeTheory } from '@/components/topics/lagrange/LagrangeTheory';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,15 +101,29 @@ export default function LagrangePage() {
     calculate({ points, evaluateAt });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={result.message} />
-        <LagrangeResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant="success" message={result.message} />
+              <LagrangeReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'El polinomio interpolante y los nodos que lo fijan.',
+        content: <LagrangePlots result={result} />,
+      },
+      {
+        label: 'Tablas',
+        note: 'Los pesos y las bases que lo componen.',
+        content: <LagrangeTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -118,16 +135,8 @@ export default function LagrangePage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <LagrangeHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Interpolación de Lagrange',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="lagrange"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -158,9 +167,9 @@ export default function LagrangePage() {
             />
 
             {/* Evaluar en un punto */}
-            <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-muted/20 p-3">
+            <div className="flex flex-wrap items-end gap-4 border-y border-rule py-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <label className="text-xs font-medium text-muted-foreground">
                   Evaluar P(x) en
                 </label>
                 <Input
@@ -203,10 +212,9 @@ export default function LagrangePage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<LagrangeTheory />}
       />
-    </div>
   );
 }

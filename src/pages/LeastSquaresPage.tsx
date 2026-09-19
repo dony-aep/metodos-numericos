@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { LeastSquaresHeader } from '@/components/topics/minimos-cuadrados/Header';
 import { InterpolationInputGrid } from '@/components/topics/interpolacion/InterpolationInputGrid';
-import { LeastSquaresResults } from '@/components/topics/minimos-cuadrados/LeastSquaresResults';
+import {
+  LeastSquaresReadout,
+  LeastSquaresPlots,
+} from '@/components/topics/minimos-cuadrados/LeastSquaresResults';
 import { LeastSquaresTheory } from '@/components/topics/minimos-cuadrados/LeastSquaresTheory';
 import { Button } from '@/components/ui/button';
 import { useLeastSquares } from '@/hooks/useLeastSquares';
@@ -117,15 +119,24 @@ export default function LeastSquaresPage() {
       .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
   }, [xValues, yValues]);
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner variant="success" message={result.message} />
-        <LeastSquaresResults result={result} points={parsedPoints} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner variant="success" message={result.message} />
+              <LeastSquaresReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Traza',
+        note: 'La curva no pasa por los puntos: se acerca a todos.',
+        content: <LeastSquaresPlots result={result} points={parsedPoints} />,
+      },
+    ];
   }, [result, parsedPoints]);
 
   const emptyState =
@@ -137,16 +148,8 @@ export default function LeastSquaresPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <LeastSquaresHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Ajuste por Mínimos Cuadrados',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="minimos-cuadrados"
         inputSection={
           <div className="space-y-4">
             {/* Ejemplos rápidos */}
@@ -177,8 +180,8 @@ export default function LeastSquaresPage() {
             />
 
             {/* Grado del polinomio */}
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="border-y border-rule py-4">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
                 Grado del polinomio
               </p>
               <div className="flex flex-wrap gap-2">
@@ -225,10 +228,9 @@ export default function LeastSquaresPage() {
             ) : null}
           </div>
         }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<LeastSquaresTheory />}
       />
-    </div>
   );
 }

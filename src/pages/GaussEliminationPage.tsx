@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Calculator, Eraser, Play, Sigma } from 'lucide-react';
+import { Eraser, Play } from 'lucide-react';
 import { MethodEmptyState } from '@/components/shared/MethodEmptyState';
 import { MethodModuleLayout } from '@/components/shared/MethodModuleLayout';
 import { MethodResultBanner } from '@/components/shared/MethodResultBanner';
-import { GaussEliminationHeader } from '@/components/topics/eliminacion-gauss/Header';
-import { GaussEliminationResults } from '@/components/topics/eliminacion-gauss/GaussEliminationResults';
+import {
+  GaussEliminationReadout,
+  GaussEliminationTables,
+} from '@/components/topics/eliminacion-gauss/GaussEliminationResults';
 import { GaussEliminationTheory } from '@/components/topics/eliminacion-gauss/GaussEliminationTheory';
 import { LinearSystemInputGrid } from '@/components/topics/sistemas-lineales/LinearSystemInputGrid';
 import { Button } from '@/components/ui/button';
@@ -124,18 +126,27 @@ export default function GaussEliminationPage() {
     calculate({ matrix, vector });
   };
 
-  const resultsSection = useMemo(() => {
+  const resultSections = useMemo(() => {
     if (!result) return undefined;
-
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <MethodResultBanner
-          variant={result.hasUniqueSolution ? 'success' : 'warning'}
-          message={result.message}
-        />
-        <GaussEliminationResults result={result} />
-      </div>
-    );
+    return [
+      {
+        label: 'Lectura',
+        content: (
+            <div className="space-y-6">
+                <MethodResultBanner
+        variant={result.hasUniqueSolution ? 'success' : 'warning'}
+        message={result.message}
+      />
+              <GaussEliminationReadout result={result} />
+            </div>
+          ),
+      },
+      {
+        label: 'Tablas',
+        note: 'La matriz triangulada y el camino hasta ella.',
+        content: <GaussEliminationTables result={result} />,
+      },
+    ];
   }, [result]);
 
   const emptyState =
@@ -147,16 +158,8 @@ export default function GaussEliminationPage() {
     ) : null;
 
   return (
-    <div className="space-y-4">
-      <GaussEliminationHeader />
-      <MethodModuleLayout
-        labels={{
-          calculatorTab: 'Calculadora',
-          theoryTab: 'Teoría',
-          inputSectionTitle: 'Eliminación de Gauss (Ax = b)',
-        }}
-        calculatorIcon={<Calculator className="h-4 w-4 sm:h-5 sm:w-5" />}
-        theoryIcon={<Sigma className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+    <MethodModuleLayout
+        slug="eliminacion-gauss"
         inputSection={
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -211,10 +214,9 @@ export default function GaussEliminationPage() {
           ) : null}
         </div>
       }
-        resultsSection={resultsSection}
+        resultSections={resultSections}
         emptyState={emptyState}
         theorySection={<GaussEliminationTheory />}
       />
-    </div>
   );
 }

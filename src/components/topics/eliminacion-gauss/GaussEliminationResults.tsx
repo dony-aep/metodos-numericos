@@ -55,30 +55,30 @@ function AugmentedMatrixTable({
   const variableCount = matrix[0].length - 1;
 
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader className="pb-0">
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/20 hover:bg-muted/20">
-                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+              <TableRow>
+                <TableHead>
                   Fila
                 </TableHead>
                 {Array.from({ length: variableCount }).map((_, index) => (
                   <TableHead
                     key={`head-a-${index}`}
-                    className="text-right text-[10px] font-semibold uppercase tracking-wider"
+                    className="text-right"
                   >
                     x{index + 1}
                   </TableHead>
                 ))}
-                <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                <TableHead className="text-right">
                   b
                 </TableHead>
               </TableRow>
@@ -112,9 +112,9 @@ function AugmentedMatrixTable({
 
 function StepsTable({ steps }: { steps: GaussEliminationStep[] }) {
   return (
-    <Card className="border-border bg-card">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2">
           <List className="h-4 w-4 text-muted-foreground" />
           Trazabilidad de pasos
           <Badge variant="secondary" className="ml-auto font-mono text-xs">
@@ -122,21 +122,21 @@ function StepsTable({ steps }: { steps: GaussEliminationStep[] }) {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/20 hover:bg-muted/20">
-                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+              <TableRow>
+                <TableHead>
                   #
                 </TableHead>
-                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableHead>
                   Tipo
                 </TableHead>
-                <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                <TableHead>
                   Col. pivote
                 </TableHead>
-                <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                <TableHead className="text-right">
                   Factor
                 </TableHead>
               </TableRow>
@@ -180,15 +180,15 @@ function StepsTable({ steps }: { steps: GaussEliminationStep[] }) {
   );
 }
 
-export function GaussEliminationResults({ result }: GaussEliminationResultsProps) {
+export function GaussEliminationReadout({ result }: GaussEliminationResultsProps) {
   const unique = result.hasUniqueSolution;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-8">
       {/* Diagnóstico */}
-      <Card className="border-border bg-card">
+      <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             {unique ? (
               <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             ) : (
@@ -202,8 +202,8 @@ export function GaussEliminationResults({ result }: GaussEliminationResultsProps
             className={cn(
               'text-xs',
               unique
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300'
-                : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300'
+                ? '  text-emerald-700   dark:text-emerald-300'
+                : '  text-amber-700   dark:text-amber-300'
             )}
             variant="outline"
           >
@@ -216,25 +216,40 @@ export function GaussEliminationResults({ result }: GaussEliminationResultsProps
           ) : null}
         </CardContent>
       </Card>
+      {/* Triangular superior */}
+      {result.upperTriangular ? (
+        <AugmentedMatrixTable
+          matrix={result.upperTriangular}
+          title="Matriz triangular superior"
+        />
+      ) : null}
+      {/* Pasos */}
+      <StepsTable steps={result.steps} />
+    </div>
+  );
+}
 
+export function GaussEliminationTables({ result }: GaussEliminationResultsProps) {
+  return (
+    <div className="space-y-10">
       {/* Vector solución */}
       {result.solution ? (
-        <Card className="border-border bg-card">
+        <Card>
           <CardHeader className="pb-0">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
               Vector solución
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/20 hover:bg-muted/20">
-                    <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  <TableRow>
+                    <TableHead>
                       Variable
                     </TableHead>
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                    <TableHead className="text-right">
                       Valor
                     </TableHead>
                   </TableRow>
@@ -256,24 +271,23 @@ export function GaussEliminationResults({ result }: GaussEliminationResultsProps
           </CardContent>
         </Card>
       ) : null}
-
       {/* Residual */}
       {result.residual ? (
-        <Card className="border-border bg-card">
+        <Card>
           <CardHeader className="pb-0">
             <CardTitle className="text-base text-muted-foreground">
               Vector residual (Ax − b)
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-muted/20 hover:bg-muted/20">
-                    <TableHead className="text-[10px] font-semibold uppercase tracking-wider">
+                  <TableRow>
+                    <TableHead>
                       Componente
                     </TableHead>
-                    <TableHead className="text-right text-[10px] font-semibold uppercase tracking-wider">
+                    <TableHead className="text-right">
                       Valor
                     </TableHead>
                   </TableRow>
@@ -295,17 +309,6 @@ export function GaussEliminationResults({ result }: GaussEliminationResultsProps
           </CardContent>
         </Card>
       ) : null}
-
-      {/* Triangular superior */}
-      {result.upperTriangular ? (
-        <AugmentedMatrixTable
-          matrix={result.upperTriangular}
-          title="Matriz triangular superior"
-        />
-      ) : null}
-
-      {/* Pasos */}
-      <StepsTable steps={result.steps} />
     </div>
   );
 }
