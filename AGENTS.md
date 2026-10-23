@@ -147,15 +147,8 @@ fix: corregir cálculo en eliminación de Gauss
 
 The default branch is `main`.
 
-## Skills live in two mirrored directories
+## Skills
 
-Each tool reads its own path. Claude Code reads `.claude/skills/` and the other agents read
-`.agents/skills/`.
-
-**IMPORTANT:** when you create, edit or delete a skill, apply the same change to both paths in
-the same commit. If only one changes, agents start behaving differently depending on which
-tool ran them, and nothing reports an error. Before committing, this must print nothing:
-
-```bash
-diff -r .agents/skills .claude/skills
-```
+The repo ships no skills. Agents use the user-level ones (`~/.claude/skills/`,
+`~/.agents/skills/`), so don't add `.claude/skills/` or `.agents/skills/` here: a project copy
+of a global skill drifts from it, and which version runs then depends on the tool.

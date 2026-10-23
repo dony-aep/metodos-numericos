@@ -123,10 +123,7 @@ español. La interfaz, el contenido y el CHANGELOG también van en español, con
 los identificadores del código, en inglés.
 
 Las instrucciones para agentes están en [AGENTS.md](AGENTS.md), que
-[CLAUDE.md](CLAUDE.md) importa en vez de duplicar. Los skills viven por duplicado en
-[`.claude/skills/`](.claude/skills/) y [`.agents/skills/`](.agents/skills/) porque cada
-herramienta lee su propia ruta. Los dos árboles son idénticos byte a byte y tienen que
-seguir siéndolo: si editas uno, replica el cambio en el otro dentro del mismo commit y
-compruébalo con `diff -r .agents/skills .claude/skills`.
+[CLAUDE.md](CLAUDE.md) importa en vez de duplicar. El repo no trae skills: los agentes usan
+los globales del usuario.
 
 El historial de cambios está en [CHANGELOG.md](CHANGELOG.md).
