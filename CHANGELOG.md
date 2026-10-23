@@ -2,6 +2,77 @@
 
 Todos los cambios importantes de este proyecto se documentan aquí.
 
+## [0.5.0] - 2026-10-23
+
+Rediseño de la interfaz sobre una rejilla de cuaderno, con la teoría de los dieciséis métodos
+reescrita, icono propio y el stack al día en **0 vulnerabilidades** (`npm audit`).
+
+### Added
+- **La rejilla del cuaderno** (`MarginGrid` y `MarginSection`): cada sección son dos celdas
+  contiguas, el rótulo en el margen y el contenido al lado. Por debajo de 1024px el margen
+  desaparece y el rótulo se cuela encima de su contenido.
+- `MethodModuleLayout` monta un método desde su `slug` y una lista de secciones de resultado,
+  con el vocabulario compartido: «Lectura» para las cifras, «Traza» para las gráficas y «Tablas»
+  para las iteraciones.
+- `TheoryBlock` compone cada apartado de teoría como una página de libro: la prosa a una medida
+  de unos 68 caracteres y las fórmulas en el margen derecho con su rótulo. Son 90 bloques en los
+  dieciséis métodos. Las ecuaciones que son un desarrollo término a término se marcan con `wide`
+  y bajan a todo el ancho bajo el texto.
+- `Readout` y `ErrorBar` como primitivas de las cifras. La barra de error va en escala
+  logarítmica, así que la convergencia se lee como una escalera.
+- La ficha de datos y el caso que falla se declaran en `methods.ts`, de donde los hereda
+  cualquier método nuevo sin tocar componentes.
+- **Icono propio**: una sigma sobre teja oscura, con terminales rectos y unión en inglete para
+  que case con los filetes de la interfaz. `npm run icons` deriva de ese único SVG el
+  `favicon.ico` de tres tamaños, el `apple-touch-icon` de 180, los iconos de 192 y 512 y la
+  tarjeta social de 1200x630, cuyo fondo es el fractal de Newton sobre z³ = 1.
+
+### Changed
+- La barra lateral fija se sustituye por un panel flotante que abre el botón «Métodos» de la
+  cabecera, con los dieciséis métodos agrupados por las seis familias del temario y la fórmula
+  de cada uno. Cierra con Escape, con clic fuera y con el propio botón.
+- **Teoría reescrita en los quince métodos restantes**, que conservaban el texto anterior. Cada
+  módulo explica ahora por qué existe la fórmula: de dónde salen los pesos de Simpson, por qué
+  la diferencia centrada gana un orden sobre la unilateral, qué pierde Euler al acumular pasos.
+- `Card`, `Badge` y el aviso de resultado quedan aplanados a filetes, sin fondos, sin pastillas
+  y sin sombras.
+- El alias `@` de la configuración de Vite se resuelve con `import.meta.dirname` en vez de
+  `__dirname`, del que Vite 8.3 avisa que no funciona con el cargador nativo.
+- Stack al día: `react` y `react-dom` 19.3.1, `react-router` 8.5.0, `vite` 8.3.5,
+  `@base-ui/react` 1.9.0, `lucide-react` 1.61.0, `eslint` 10.13.0, `typescript-eslint` 8.72.0,
+  `shadcn` 4.22.1, `sharp` 0.35.5, `@vitejs/plugin-react` 6.1.2, `globals` 17.13.0 y
+  `@types/node` 24.19.2.
+- **KaTeX sube a 0.19.0.** La versión reporta las métricas de carácter que faltan a través de la
+  opción `strict` y cambia el tipado de sus callbacks. `MathRenderer` llama a `renderToString`
+  con `strict: false`, un booleano y no un callback, así que no hubo que tocar nada. Fórmulas
+  comprobadas en claro y oscuro.
+- `typescript` se queda en 6.0.3 y `@types/node` en la serie 24. `typescript-eslint` 8.72.0
+  declara el peer `>=4.8.4 <6.1.0`, que deja fuera a TypeScript 7, y los tipos de Node siguen al
+  runtime de Node 24 del despliegue.
+
+### Fixed
+- Las etiquetas `og:image` y `twitter:image` apuntaban al SVG, que ninguna red social renderiza,
+  así que el enlace salía sin imagen.
+
+### Removed
+- Los dieciséis encabezados de método clonados, 884 líneas, sustituidos por uno solo alimentado
+  desde `methods.ts`. Cae con ellos el número de dos dígitos, que fingía un orden que no existe.
+
+### Security
+- Cerrados los 6 avisos de `npm audit` (4 altos y 2 moderados), que cubren las 9 alertas abiertas
+  de Dependabot: `vite` (lectura de archivos fuera de `server.fs.allow` y ejecución de comandos
+  de `launch-editor` en Windows), `sharp` (CVE-2026-96889 en librsvg) y cuatro transitivas del
+  CLI de `shadcn` y del toolchain de Tailwind, `@modelcontextprotocol/sdk`, `hono`,
+  `source-map-js` e `ip-address`. Todas se resuelven con las actualizaciones de los paquetes
+  directos, sin forzar ninguna versión.
+
+### Documentation
+- `AGENTS.md` pasa a ser la única fuente de instrucciones para los agentes y `CLAUDE.md` queda
+  como puente con `@AGENTS.md`. Documenta las convenciones del rediseño, `npm run icons` y el
+  flag `--allow-remote=all`, sin el que `npm install` falla con npm 12 en adelante.
+- El README abre con lo que distingue al proyecto, con el enlace al despliegue en la primera
+  pantalla.
+
 ## [0.4.2] - 2026-09-15
 
 Versión de mantenimiento: sin módulos ni funcionalidad nueva. Pone el stack al día y vuelve a
